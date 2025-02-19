@@ -7,9 +7,11 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build && cd server && npm install && npm run build",
-    "start": "cd server && node dist/index.js",
+    "dev:frontend": "vite",
+    "dev:backend": "cd server && ts-node-dev --respawn --transpile-only src/index.ts",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "build": "tsc && vite build && cd server && tsc",
+    "start": "node server/dist/index.js",
     "postinstall": "npm run build"
   },
   "dependencies": {
@@ -65,19 +67,24 @@
     "sonner": "^1.2.4",
     "tailwind-merge": "^2.0.0",
     "tailwindcss-animate": "^1.0.7",
+    "typescript": "^5.2.2",
     "vaul": "^0.8.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
     "@jest/types": "^29.6.3",
+    "@types/cors": "^2.8.16",
+    "@types/express": "^4.17.21",
     "@types/node": "^20.9.0",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@vitejs/plugin-react-swc": "^3.3.2",
     "autoprefixer": "^10.4.16",
+    "concurrently": "^8.2.2",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.5",
+    "ts-node-dev": "^2.0.0",
     "typescript": "^5.0.2",
     "vite": "^4.4.5"
   }

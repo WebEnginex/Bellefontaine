@@ -12,7 +12,7 @@ const __dirname = path.dirname(__filename);
 const DIST_DIR = path.join(__dirname, '../../dist');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;  // Changed to 3001 to avoid conflict with Vite
 
 // Middleware
 app.use(cors());
