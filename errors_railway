@@ -1,0 +1,132 @@
+Starting Container
+
+npm warn config production Use `--omit=dev` instead.
+
+ 
+
+up to date, audited 958 packages in 2s
+
+ 
+
+122 packages are looking for funding
+
+  run `npm fund` for details
+
+ 
+
+5 moderate severity vulnerabilities
+
+ 
+
+To address issues that do not require attention, run:
+
+  npm audit fix
+
+ 
+
+Some issues need review, and may require choosing
+
+a different dependency.
+
+ 
+
+Run `npm audit` for details.
+
+npm warn config production Use `--omit=dev` instead.
+
+ 
+
+> vite_react_shadcn_ts@0.0.0 build
+
+> vite build
+
+ 
+
+vite v5.4.14 building for production...
+
+transforming...
+
+✓ 3027 modules transformed.
+
+rendering chunks...
+
+computing gzip size...
+
+dist/index.html                    0.70 kB │ gzip:   0.37 kB
+
+dist/assets/index-BAdYarVU.css    57.47 kB │ gzip:  10.59 kB
+
+dist/assets/browser-FQjAAPUQ.js    0.30 kB │ gzip:   0.25 kB
+
+dist/assets/index-DFIt13a7.js    797.54 kB │ gzip: 241.43 kB
+
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+
+- Using dynamic import() to code-split the application
+
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+
+✓ built in 10.02s
+
+npm warn config production Use `--omit=dev` instead.
+
+ 
+
+> vite_react_shadcn_ts@0.0.0 start
+
+> node server/index.js
+
+ 
+
+node:internal/modules/cjs/loader:1143
+
+  throw err;
+
+  ^
+
+ 
+
+Error: Cannot find module '/app/server/index.js'
+
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1140:15)
+
+    at Module._load (node:internal/modules/cjs/loader:981:27)
+
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12)
+
+    at node:internal/main/run_main_module:28:49 {
+
+  code: 'MODULE_NOT_FOUND',
+
+  requireStack: []
+
+}
+
+ 
+
+Node.js v18.20.5
+
+npm warn config production Use `--omit=dev` instead.
+
+ 
+
+up to date, audited 958 packages in 2s
+
+ 
+
+122 packages are looking for funding
+
+  run `npm fund` for details
+
+ 
+
+5 moderate severity vulnerabilities
+
+ 
+
+To address issues that do not require attention, run:
+
+  npm audit fix

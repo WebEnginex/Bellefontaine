@@ -59,7 +59,7 @@ export default function Auth() {
             <TabsTrigger value="signup">Inscription</TabsTrigger>
           </TabsList>
           <TabsContent value="signin" className="mt-0">
-            <SignInForm onForgotPassword={handleForgotPassword} onSuccess={handleAuthSuccess} />
+            <SignInForm onForgotPasswordClick={handleForgotPassword} />
           </TabsContent>
           <TabsContent value="signup" className="mt-0">
             <SignUpForm onSuccess={() => setActiveTab("signin")} />

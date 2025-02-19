@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom';
+import { jest } from '@jest/globals';
 
 // Mock de l'objet window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
