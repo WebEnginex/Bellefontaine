@@ -59,8 +59,8 @@ app.use(cors({
 app.use(express.json());
 
 // Servir les fichiers statiques du build frontend
-const __dirname = new URL('.', import.meta.url).pathname.replace(/^\/[A-Za-z]:/, '');
-app.use(express.static(path.join(__dirname, 'dist')));
+const __dirname = new URL('.', import.meta.url).pathname;
+app.use(express.static(path.join(__dirname, '../dist')));
 
 // Création du routeur
 const router = Router();
@@ -147,7 +147,7 @@ app.use('/api', router);
 
 // Toutes les autres routes renvoient vers l'index.html
 app.get('*', (_req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, 'dist/index.html'));
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
 // Fonction pour trouver un port disponible
