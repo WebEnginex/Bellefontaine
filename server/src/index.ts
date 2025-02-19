@@ -17,28 +17,22 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Health check endpoint - MUST be before static files
+// Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV
+  });
 });
 
 // Serve static files
 app.use(express.static(path.join(__dirname, '../../dist')));
 
 // Initialize Supabase client
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Missing Supabase environment variables, some features may not work');
-}
-
-const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
-
-// API routes
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
+const supabaseUrl = process.env.SUPABASE_URL || '';
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Catch-all route for SPA
 app.get('*', (req, res) => {
@@ -46,5 +40,7 @@ app.get('*', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`Server running on port ${port}`);
+  console.log(`Environment: ${process.env.NODE_ENV}`);
+  console.log(`Supabase URL configured: ${Boolean(supabaseUrl)}`);
 });
