@@ -49,7 +49,7 @@ const app = express();
 
 // Configuration de CORS
 app.use(cors({
-  origin: 'http://localhost:8081',
+  origin: process.env.NODE_ENV === 'production' ? 'https://bellefontaine.railway.app' : 'http://localhost:8081',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -57,6 +57,10 @@ app.use(cors({
 
 // Middleware pour parser le JSON
 app.use(express.json());
+
+// Servir les fichiers statiques du build frontend
+const __dirname = new URL('.', import.meta.url).pathname;
+app.use(express.static(path.join(__dirname, '../dist')));
 
 // Création du routeur
 const router = Router();
@@ -138,8 +142,13 @@ router.post<ParamsDictionary, SignUpResponse, SignUpBody>(
   }
 );
 
-// Utilisation du routeur
-app.use(router);
+// Utiliser le routeur pour les routes API
+app.use('/api', router);
+
+// Toutes les autres routes renvoient vers l'index.html
+app.get('*', (_req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
+});
 
 // Fonction pour trouver un port disponible
 const findAvailablePort = async (startPort: number): Promise<number> => {
