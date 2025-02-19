@@ -81,7 +81,7 @@ app.use(cors({
 app.use(express.json());
 
 // Servir les fichiers statiques du build frontend
-const __dirname = new URL('.', import.meta.url).pathname;
+const __dirname = new URL('.', import.meta.url).pathname.replace(/^\/[A-Za-z]:/, '');
 const staticPath = path.join(__dirname, '../dist');
 console.log('📁 Chemin des fichiers statiques:', staticPath);
 app.use(express.static(staticPath));
@@ -171,10 +171,8 @@ app.use('/api', router);
 
 // Toutes les autres routes renvoient vers l'index.html
 app.get('*', (req: Request, res: Response) => {
-  const indexPath = path.join(__dirname, '../dist/index.html');
-  console.log('🌐 Servir index.html pour:', req.url);
-  console.log('📄 Chemin du fichier:', indexPath);
-  res.sendFile(indexPath);
+  console.log('🌐 Route catch-all pour:', req.url);
+  res.sendFile(path.join(staticPath, 'index.html'));
 });
 
 // Démarrer le serveur

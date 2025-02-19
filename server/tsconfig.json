@@ -12,9 +12,12 @@
     "resolveJsonModule": true
   },
   "include": [
-    "*.ts"
+    "./**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dist",
+    "../src/**/*",
+    "../dist/**/*"
   ]
 }

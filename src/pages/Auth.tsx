@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import SignInForm from "@/components/auth/SignInForm";
+import { SignInForm } from "@/components/auth/SignInForm";
 import SignUpForm from "@/components/auth/SignUpForm";
 import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
 import ResetPasswordForm from "@/components/auth/ResetPasswordForm";

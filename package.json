@@ -3,10 +3,14 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && cd server && npm install && npm run build",
-    "build:dev": "vite build --mode development",
+    "build:frontend": "tsc && vite build",
+    "build:server": "cd server && npm install --omit=dev && npm run build",
+    "build": "npm run build:frontend && npm run build:server",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "start": "cd server && npm start",

@@ -1,1 +1,1 @@
-web: npm ci --only=production && npm run build && npm start
+web: npm install --production=false && npm run build && npm prune --production && npm start

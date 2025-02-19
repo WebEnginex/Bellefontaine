@@ -6,14 +6,12 @@ import { componentTagger } from "lovable-tagger";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
-    host: "::",
-    port: 3000,
-    strictPort: true, // Ne pas chercher d'autre port si 3000 est occupé
+    port: process.env.PORT ? parseInt(process.env.PORT) : 3000,
+    strictPort: true,
   },
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
+    mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {
@@ -21,6 +19,10 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    emptyOutDir: true,
+    sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -28,20 +30,20 @@ export default defineConfig(({ mode }) => ({
             'react',
             'react-dom',
             'react-router-dom',
-            '@supabase/supabase-js',
+            '@supabase/supabase-js'
+          ],
+          ui: [
             '@radix-ui/react-dialog',
             '@radix-ui/react-label',
             '@radix-ui/react-slot',
             'class-variance-authority',
             'clsx',
-            'tailwind-merge'
-          ],
-          ui: [
-            '@/components/ui',
+            'tailwind-merge',
+            '@/components/ui'
           ],
         },
       },
     },
-    chunkSizeWarningLimit: 1000, // Augmenter la limite d'avertissement à 1000kb
+    chunkSizeWarningLimit: 1000,
   },
 }));

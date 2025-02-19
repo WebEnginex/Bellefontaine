@@ -1,23 +1,33 @@
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 interface SignInFormProps {
   onForgotPasswordClick: () => void;
 }
 
-export default function SignInForm({ onForgotPasswordClick }: SignInFormProps) {
-  const { signIn } = useAuth();
-  const [loading, setLoading] = useState(false);
+export function SignInForm({ onForgotPasswordClick }: SignInFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
 
   const validateEmail = (email: string) => {
-    return email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -27,7 +37,7 @@ export default function SignInForm({ onForgotPasswordClick }: SignInFormProps) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Veuillez entrer une adresse email valide",
+        description: "Veuillez entrer une adresse email valide"
       });
       return;
     }
@@ -36,7 +46,7 @@ export default function SignInForm({ onForgotPasswordClick }: SignInFormProps) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Veuillez entrer votre mot de passe",
+        description: "Veuillez entrer votre mot de passe"
       });
       return;
     }
@@ -44,6 +54,12 @@ export default function SignInForm({ onForgotPasswordClick }: SignInFormProps) {
     try {
       setLoading(true);
       await signIn(email, password);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erreur de connexion",
+        description: "Email ou mot de passe incorrect"
+      });
     } finally {
       setLoading(false);
     }
@@ -54,43 +70,47 @@ export default function SignInForm({ onForgotPasswordClick }: SignInFormProps) {
       <CardHeader>
         <CardTitle>Connexion</CardTitle>
         <CardDescription>
-          Connectez-vous à votre compte pour accéder à vos réservations
+          Connectez-vous pour accéder à votre compte
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSignIn} className="space-y-4" role="form">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <FormLabel htmlFor="email">Email</FormLabel>
             <Input
               id="email"
               type="email"
-              placeholder="Email"
+              placeholder="exemple@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
+              required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Mot de passe</Label>
+            <FormLabel htmlFor="password">Mot de passe</FormLabel>
             <Input
               id="password"
               type="password"
-              placeholder="Mot de passe"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
+              required
             />
           </div>
           <Button
+            type="submit"
+            className="w-full"
+            disabled={loading}
+          >
+            {loading ? "Connexion..." : "Se connecter"}
+          </Button>
+          <Button
             type="button"
             variant="link"
-            className="px-0 font-normal"
+            className="w-full"
             onClick={onForgotPasswordClick}
           >
             Mot de passe oublié ?
-          </Button>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Connexion..." : "Se connecter"}
           </Button>
         </form>
       </CardContent>
