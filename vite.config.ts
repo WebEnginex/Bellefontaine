@@ -20,4 +20,28 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: [
+            'react',
+            'react-dom',
+            'react-router-dom',
+            '@supabase/supabase-js',
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-label',
+            '@radix-ui/react-slot',
+            'class-variance-authority',
+            'clsx',
+            'tailwind-merge'
+          ],
+          ui: [
+            '@/components/ui',
+          ],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000, // Augmenter la limite d'avertissement à 1000kb
+  },
 }));
