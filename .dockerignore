@@ -5,16 +5,14 @@ npm-debug.log
 coverage
 .env
 .env.*
-!.env.exemple
+!.env.example
 *.log
 .DS_Store
 .vscode
 .idea
 
 # Build outputs
-dist
 dist-ssr
-server/dist
 *.local
 
 # Test files
