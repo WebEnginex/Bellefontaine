@@ -4,7 +4,6 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 import path from 'path';
-import { createServer } from 'net';
 
 // Charger les variables d'environnement
 const result = dotenv.config();
@@ -178,38 +177,10 @@ app.get('*', (req: Request, res: Response) => {
   res.sendFile(indexPath);
 });
 
-// Fonction pour trouver un port disponible
-const findAvailablePort = async (startPort: number): Promise<number> => {
-  const isPortAvailable = (port: number): Promise<boolean> => {
-    return new Promise((resolve) => {
-      const server = createServer();
-      
-      server.once('error', () => {
-        resolve(false);
-      });
-      
-      server.once('listening', () => {
-        server.close();
-        resolve(true);
-      });
-      
-      server.listen(port);
-    });
-  };
-  
-  let port = startPort;
-  while (!(await isPortAvailable(port))) {
-    port++;
-  }
-  
-  return port;
-};
-
 // Démarrer le serveur
 const startServer = async () => {
   try {
-    const defaultPort = parseInt(process.env.PORT || '8081');
-    const port = await findAvailablePort(defaultPort);
+    const port = process.env.PORT || '3000';
     
     console.log('⚙️ Variables d\'environnement:');
     console.log('- NODE_ENV:', process.env.NODE_ENV);
@@ -218,7 +189,7 @@ const startServer = async () => {
     console.log('- SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? '✅ Défini' : '❌ Non défini');
     
     app.listen(port, () => {
-      console.log(`🚀 Serveur démarré sur http://localhost:${port}`);
+      console.log(`🚀 Serveur démarré sur le port ${port}`);
     });
   } catch (error) {
     console.error('❌ Erreur au démarrage du serveur:', error);
@@ -227,6 +198,6 @@ const startServer = async () => {
 };
 
 startServer().catch(err => {
-  console.error(' Erreur lors du démarrage du serveur:', err);
+  console.error('❌ Erreur lors du démarrage du serveur:', err);
   process.exit(1);
 });
