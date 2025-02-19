@@ -10,11 +10,13 @@ export const useReservation = () => {
   const [numberOfPilots, setNumberOfPilots] = useState<string>("1");
   const { user } = useAuth();
   const { slotsWithBookings, isLoading } = useAvailableSlots();
-  const { hasExistingBooking } = useExistingBooking(selectedDate, slotsWithBookings);
+  const { hasExistingBooking } = useExistingBooking(selectedDate, slotsWithBookings || []);
   const { isSubmitting, handleSubmit: submitBooking } = useBookingSubmission();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedDate || !slotsWithBookings) return false;
+
     const success = await submitBooking(
       selectedDate,
       circuit,
@@ -39,11 +41,11 @@ export const useReservation = () => {
     setCircuit,
     numberOfPilots,
     setNumberOfPilots,
-    isSubmitting,
-    hasExistingBooking,
+    user,
     slotsWithBookings,
     isLoading,
+    hasExistingBooking,
+    isSubmitting,
     handleSubmit,
-    user
   };
 };
