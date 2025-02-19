@@ -49,7 +49,7 @@ const app = express();
 
 // Configuration de CORS
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? 'https://bellefontaine.railway.app' : 'http://localhost:8081',
+  origin: process.env.NODE_ENV === 'production' ? ['https://circuitsbellefontaine.fr', 'https://www.circuitsbellefontaine.fr'] : 'http://localhost:8081',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
