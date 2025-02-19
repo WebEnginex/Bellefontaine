@@ -14,7 +14,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "start": "cd server && npm install && npm start"
+    "start": "cd server && npm install && npm run build && npm start"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
