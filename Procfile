@@ -1,1 +1,1 @@
-web: npm install --production=false && npm run build && npm prune --production && npm start
+web: npm install --omit=dev && npm run build && npm start

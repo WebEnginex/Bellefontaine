@@ -13,7 +13,7 @@
     "build": "npm run build:frontend && npm run build:server",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "start": "cd server && npm start",
+    "start": "cd server && npm start --omit=dev",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
