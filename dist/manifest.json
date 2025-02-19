@@ -1,0 +1,211 @@
+{
+  "_alert-dialog-0254d15d.js": {
+    "file": "assets/alert-dialog-0254d15d.js",
+    "imports": [
+      "index.html",
+      "_index-1185bc7d.js",
+      "_supabase-client-5015c98a.js"
+    ]
+  },
+  "_browser-40aee848.js": {
+    "file": "assets/browser-40aee848.js",
+    "imports": [
+      "index.html"
+    ],
+    "isDynamicEntry": true
+  },
+  "_clock-29e84137.js": {
+    "file": "assets/clock-29e84137.js",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_form-99120a69.js": {
+    "file": "assets/form-99120a69.js",
+    "imports": [
+      "index.html",
+      "_input-f321aa22.js"
+    ]
+  },
+  "_index-1185bc7d.js": {
+    "file": "assets/index-1185bc7d.js",
+    "imports": [
+      "index.html",
+      "_supabase-client-5015c98a.js"
+    ]
+  },
+  "_index-55eef685.js": {
+    "file": "assets/index-55eef685.js",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_index-6dbaa3ae.js": {
+    "file": "assets/index-6dbaa3ae.js",
+    "imports": [
+      "_index-55eef685.js"
+    ]
+  },
+  "_index-99ccf18f.js": {
+    "file": "assets/index-99ccf18f.js",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_input-f321aa22.js": {
+    "file": "assets/input-f321aa22.js",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_mail-ce481569.js": {
+    "file": "assets/mail-ce481569.js",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_supabase-client-5015c98a.js": {
+    "dynamicImports": [
+      "_browser-40aee848.js"
+    ],
+    "file": "assets/supabase-client-5015c98a.js",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_tabs-04bc6101.js": {
+    "file": "assets/tabs-04bc6101.js",
+    "imports": [
+      "index.html",
+      "_index-1185bc7d.js",
+      "_index-99ccf18f.js"
+    ]
+  },
+  "_textarea-91d995a4.js": {
+    "file": "assets/textarea-91d995a4.js",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_useRealtimeUpdates-b1dc8420.js": {
+    "file": "assets/useRealtimeUpdates-b1dc8420.js",
+    "imports": [
+      "index.html",
+      "_index-1185bc7d.js",
+      "_index-99ccf18f.js",
+      "_supabase-client-5015c98a.js"
+    ]
+  },
+  "index.css": {
+    "file": "assets/index-98e1d77c.css",
+    "src": "index.css"
+  },
+  "index.html": {
+    "css": [
+      "assets/index-98e1d77c.css"
+    ],
+    "dynamicImports": [
+      "src/pages/Auth.tsx",
+      "src/pages/Dashboard.tsx",
+      "src/pages/Contact.tsx",
+      "src/pages/Account.tsx",
+      "src/pages/Reserver.tsx",
+      "src/pages/Index.tsx",
+      "src/pages/NotFound.tsx"
+    ],
+    "file": "assets/index-692334f1.js",
+    "isEntry": true,
+    "src": "index.html"
+  },
+  "src/pages/Account.tsx": {
+    "file": "assets/Account-af842040.js",
+    "imports": [
+      "index.html",
+      "_index-1185bc7d.js",
+      "_index-55eef685.js",
+      "_supabase-client-5015c98a.js",
+      "_alert-dialog-0254d15d.js",
+      "_mail-ce481569.js",
+      "_clock-29e84137.js",
+      "_index-6dbaa3ae.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/pages/Account.tsx"
+  },
+  "src/pages/Auth.tsx": {
+    "file": "assets/Auth-1f52ed10.js",
+    "imports": [
+      "index.html",
+      "_tabs-04bc6101.js",
+      "_supabase-client-5015c98a.js",
+      "_form-99120a69.js",
+      "_input-f321aa22.js",
+      "_index-1185bc7d.js",
+      "_alert-dialog-0254d15d.js",
+      "_index-99ccf18f.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/pages/Auth.tsx"
+  },
+  "src/pages/Contact.tsx": {
+    "file": "assets/Contact-b8ef67cc.js",
+    "imports": [
+      "index.html",
+      "_form-99120a69.js",
+      "_input-f321aa22.js",
+      "_textarea-91d995a4.js",
+      "_supabase-client-5015c98a.js",
+      "_mail-ce481569.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/pages/Contact.tsx"
+  },
+  "src/pages/Dashboard.tsx": {
+    "file": "assets/Dashboard-ffd81dd3.js",
+    "imports": [
+      "index.html",
+      "_index-1185bc7d.js",
+      "_index-55eef685.js",
+      "_supabase-client-5015c98a.js",
+      "_tabs-04bc6101.js",
+      "_useRealtimeUpdates-b1dc8420.js",
+      "_alert-dialog-0254d15d.js",
+      "_index-6dbaa3ae.js",
+      "_input-f321aa22.js",
+      "_textarea-91d995a4.js",
+      "_index-99ccf18f.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/pages/Dashboard.tsx"
+  },
+  "src/pages/Index.tsx": {
+    "file": "assets/Index-df53bc21.js",
+    "imports": [
+      "index.html"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/pages/Index.tsx"
+  },
+  "src/pages/NotFound.tsx": {
+    "file": "assets/NotFound-07b37f1f.js",
+    "imports": [
+      "index.html"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/pages/NotFound.tsx"
+  },
+  "src/pages/Reserver.tsx": {
+    "file": "assets/Reserver-ef06e035.js",
+    "imports": [
+      "index.html",
+      "_supabase-client-5015c98a.js",
+      "_useRealtimeUpdates-b1dc8420.js",
+      "_index-1185bc7d.js",
+      "_index-55eef685.js",
+      "_clock-29e84137.js",
+      "_index-99ccf18f.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/pages/Reserver.tsx"
+  }
+}
