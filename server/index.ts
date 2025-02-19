@@ -17,7 +17,11 @@ console.log(' Variables d\'environnement chargées:', {
 
 // Gestionnaire d'erreurs global
 process.on('uncaughtException', (err) => {
-  console.error(' Erreur non interceptée:', err);
+  console.error('❌ Erreur non interceptée:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Promesse rejetée non gérée:', reason);
 });
 
 // Initialisation de Supabase
@@ -47,9 +51,28 @@ interface SignUpResponse {
 // Création de l'application Express
 const app = express();
 
+// Middleware de logging
+app.use((req, _res, next) => {
+  console.log(`📝 ${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
+
 // Configuration de CORS
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? ['https://circuitsbellefontaine.fr', 'https://www.circuitsbellefontaine.fr'] : 'http://localhost:8081',
+  origin: (origin, callback) => {
+    const allowedOrigins = process.env.NODE_ENV === 'production' 
+      ? ['https://circuitsbellefontaine.fr', 'https://www.circuitsbellefontaine.fr'] 
+      : ['http://localhost:8081'];
+    
+    console.log('🔒 Requête CORS de:', origin);
+    console.log('✅ Origines autorisées:', allowedOrigins);
+    
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Non autorisé par CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -60,7 +83,9 @@ app.use(express.json());
 
 // Servir les fichiers statiques du build frontend
 const __dirname = new URL('.', import.meta.url).pathname;
-app.use(express.static(path.join(__dirname, '../dist')));
+const staticPath = path.join(__dirname, '../dist');
+console.log('📁 Chemin des fichiers statiques:', staticPath);
+app.use(express.static(staticPath));
 
 // Création du routeur
 const router = Router();
@@ -146,8 +171,11 @@ router.post<ParamsDictionary, SignUpResponse, SignUpBody>(
 app.use('/api', router);
 
 // Toutes les autres routes renvoient vers l'index.html
-app.get('*', (_req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, '../dist/index.html'));
+app.get('*', (req: Request, res: Response) => {
+  const indexPath = path.join(__dirname, '../dist/index.html');
+  console.log('🌐 Servir index.html pour:', req.url);
+  console.log('📄 Chemin du fichier:', indexPath);
+  res.sendFile(indexPath);
 });
 
 // Fonction pour trouver un port disponible
@@ -179,18 +207,23 @@ const findAvailablePort = async (startPort: number): Promise<number> => {
 
 // Démarrer le serveur
 const startServer = async () => {
-  const defaultPort = parseInt(process.env.PORT || '5000');
-  const port = await findAvailablePort(defaultPort);
-  
-  // Mettre à jour la variable d'environnement PORT
-  process.env.PORT = port.toString();
-  
-  app.listen(port, () => {
-    console.log(` Serveur démarré sur http://localhost:${port}`);
-    if (port !== defaultPort) {
-      console.log(` Le port ${defaultPort} était occupé, utilisation du port ${port} à la place`);
-    }
-  });
+  try {
+    const defaultPort = parseInt(process.env.PORT || '8081');
+    const port = await findAvailablePort(defaultPort);
+    
+    console.log('⚙️ Variables d\'environnement:');
+    console.log('- NODE_ENV:', process.env.NODE_ENV);
+    console.log('- PORT:', port);
+    console.log('- SUPABASE_URL:', process.env.SUPABASE_URL ? '✅ Défini' : '❌ Non défini');
+    console.log('- SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? '✅ Défini' : '❌ Non défini');
+    
+    app.listen(port, () => {
+      console.log(`🚀 Serveur démarré sur http://localhost:${port}`);
+    });
+  } catch (error) {
+    console.error('❌ Erreur au démarrage du serveur:', error);
+    process.exit(1);
+  }
 };
 
 startServer().catch(err => {

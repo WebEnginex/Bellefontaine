@@ -69,13 +69,13 @@ dist/assets/index-BIQ_F12E.js    797.52 kB │ gzip: 241.42 kB
 
 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
 
-✓ built in 10.21s
+✓ built in 11.14s
 
 npm warn config production Use `--omit=dev` instead.
 
  
 
-up to date, audited 105 packages in 972ms
+up to date, audited 105 packages in 1s
 
  
 
