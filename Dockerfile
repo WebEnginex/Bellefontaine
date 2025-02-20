@@ -7,7 +7,8 @@ RUN apk add --no-cache python3 make g++ wget
 WORKDIR /app
 
 # Mise à jour de npm à la version 11.1.0
-RUN npm install -g npm@11.1.0
+RUN npm ci --no-fund --no-audit
+
 
 # Copie des fichiers package*.json
 COPY package*.json ./
@@ -30,7 +31,8 @@ WORKDIR /app
 RUN apk add --no-cache wget
 
 # Mise à jour de npm à la même version
-RUN npm install -g npm@11.1.0
+RUN npm install -g npm@11.1.0 --no-fund --no-audit --legacy-peer-deps
+
 
 # Copie des fichiers nécessaires depuis le stage de build
 COPY --from=builder /app/dist ./dist
