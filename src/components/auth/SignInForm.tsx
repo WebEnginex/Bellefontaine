@@ -13,6 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -37,7 +38,8 @@ export function SignInForm({ onForgotPasswordClick }: SignInFormProps) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Veuillez entrer une adresse email valide"
+        description: "Veuillez entrer une adresse email valide",
+        duration: 5000,
       });
       return;
     }
@@ -46,7 +48,8 @@ export function SignInForm({ onForgotPasswordClick }: SignInFormProps) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Veuillez entrer votre mot de passe"
+        description: "Veuillez entrer votre mot de passe",
+        duration: 5000,
       });
       return;
     }
@@ -58,7 +61,8 @@ export function SignInForm({ onForgotPasswordClick }: SignInFormProps) {
       toast({
         variant: "destructive",
         title: "Erreur de connexion",
-        description: "Email ou mot de passe incorrect"
+        description: "Email ou mot de passe incorrect",
+        duration: 5000,
       });
     } finally {
       setLoading(false);
@@ -76,7 +80,7 @@ export function SignInForm({ onForgotPasswordClick }: SignInFormProps) {
       <CardContent>
         <form onSubmit={handleSignIn} className="space-y-4" role="form">
           <div className="space-y-2">
-            <FormLabel htmlFor="email">Email</FormLabel>
+            <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
@@ -87,7 +91,7 @@ export function SignInForm({ onForgotPasswordClick }: SignInFormProps) {
             />
           </div>
           <div className="space-y-2">
-            <FormLabel htmlFor="password">Mot de passe</FormLabel>
+            <Label htmlFor="password">Mot de passe</Label>
             <Input
               id="password"
               type="password"

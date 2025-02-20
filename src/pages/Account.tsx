@@ -42,19 +42,41 @@ export default function Account() {
   const { data: bookings, refetch } = useQuery({
     queryKey: ["user-bookings", user?.id],
     queryFn: async () => {
+      const now = new Date();
+      console.log("Date actuelle:", now);
+      console.log("User ID:", user?.id);
+
       const { data, error } = await supabase
         .from("bookings")
         .select(`
           *,
           slots (
-            date
+            *
           )
         `)
         .eq("user_id", user?.id)
-        .order("created_at", { ascending: false });
+        .order("slots(date)", { ascending: true });
 
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error("Erreur lors de la requête:", error);
+        throw error;
+      }
+
+      console.log("Réservations reçues:", data);
+
+      // Filtrer les réservations dont la date est passée
+      const filteredBookings = data.filter(booking => {
+        if (!booking.slots?.date) {
+          console.log("Réservation sans date:", booking);
+          return false;
+        }
+        const slotDate = new Date(booking.slots.date);
+        console.log("Date du créneau:", slotDate);
+        return slotDate >= now;
+      });
+
+      console.log("Réservations filtrées:", filteredBookings);
+      return filteredBookings;
     },
     enabled: !!user?.id,
   });
@@ -95,24 +117,6 @@ export default function Account() {
 
   const getCircuitName = (number: number) =>
     number === 1 ? "Motocross" : "Supercross";
-
-  const getBookingWarningMessage = (bookingDate: string) => {
-    const today = new Date();
-    const reservationDate = new Date(bookingDate);
-    // Set the reservation time to 14:00
-    const reservationDateTime = setMinutes(setHours(reservationDate, 14), 0);
-    const daysUntilReservation = differenceInDays(reservationDateTime, today);
-    const hoursUntilReservation = differenceInHours(reservationDateTime, today);
-
-    if (isSameDay(today, reservationDate)) {
-      return "⚠️ Attention : Vous annulez une réservation pour aujourd'hui. Cette annulation tardive peut impacter l'organisation.";
-    } else if (daysUntilReservation < 1) {
-      return `⚠️ Attention : Vous annulez une réservation prévue dans ${hoursUntilReservation} heure${hoursUntilReservation > 1 ? 's' : ''}.`;
-    } else if (daysUntilReservation <= 2) {
-      return `⚠️ Attention : Vous annulez une réservation prévue dans ${daysUntilReservation} jour${daysUntilReservation > 1 ? 's' : ''}.`;
-    }
-    return null;
-  };
 
   if (!user) {
     return <Navigate to="/auth" />;
@@ -255,4 +259,22 @@ export default function Account() {
       </AlertDialog>
     </div>
   );
+}
+
+function getBookingWarningMessage(bookingDate: string) {
+  const today = new Date();
+  const reservationDate = new Date(bookingDate);
+  // Set the reservation time to 14:00
+  const reservationDateTime = setMinutes(setHours(reservationDate, 14), 0);
+  const daysUntilReservation = differenceInDays(reservationDateTime, today);
+  const hoursUntilReservation = differenceInHours(reservationDateTime, today);
+
+  if (isSameDay(today, reservationDate)) {
+    return "⚠️ Attention : Vous annulez une réservation pour aujourd'hui. Cette annulation tardive peut impacter l'organisation.";
+  } else if (daysUntilReservation < 1) {
+    return `⚠️ Attention : Vous annulez une réservation prévue dans ${hoursUntilReservation} heure${hoursUntilReservation > 1 ? 's' : ''}.`;
+  } else if (daysUntilReservation <= 2) {
+    return `⚠️ Attention : Vous annulez une réservation prévue dans ${daysUntilReservation} jour${daysUntilReservation > 1 ? 's' : ''}.`;
+  }
+  return null;
 }

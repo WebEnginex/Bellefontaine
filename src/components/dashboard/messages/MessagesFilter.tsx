@@ -3,13 +3,21 @@ import { Input } from "@/components/ui";
 import { Search } from "lucide-react";
 
 interface MessagesFilterProps {
-  value: string;
-  onChange: (value: string) => void;
+  filters: {
+    read: boolean | null;
+    replied: boolean | null;
+    text: string;
+  };
+  onFilterChange: (text: string) => void;
+  onReadFilterChange: (read: boolean | null) => void;
+  onRepliedFilterChange: (replied: boolean | null) => void;
 }
 
 export const MessagesFilter: React.FC<MessagesFilterProps> = ({
-  value,
-  onChange,
+  filters,
+  onFilterChange,
+  onReadFilterChange,
+  onRepliedFilterChange,
 }) => {
   return (
     <div className="relative">
@@ -17,8 +25,8 @@ export const MessagesFilter: React.FC<MessagesFilterProps> = ({
       <Input
         type="text"
         placeholder="Rechercher un message..."
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        value={filters.text}
+        onChange={(e) => onFilterChange(e.target.value)}
         className="pl-10"
       />
     </div>

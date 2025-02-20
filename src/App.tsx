@@ -1,7 +1,8 @@
 import { Suspense, lazy } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Loading } from "@/components/ui/loading";
+import Navbar from "@/components/Navbar";
 
 // Lazy loading des pages
 const Auth = lazy(() => import("@/pages/Auth"));
@@ -16,20 +17,23 @@ function App() {
   return (
     <>
       <Toaster />
-      <BrowserRouter>
+      <Navbar />
+      <main className="min-h-screen bg-background">
         <Suspense fallback={<Loading />}>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/auth/reset-password" element={<Auth />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/account" element={<Account />} />
-            <Route path="/reserver" element={<Reserver />} />
+            <Route index element={<Index />} />
+            <Route path="auth">
+              <Route index element={<Auth />} />
+              <Route path="reset-password" element={<Auth />} />
+            </Route>
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="contact" element={<Contact />} />
+            <Route path="account" element={<Account />} />
+            <Route path="reserver" element={<Reserver />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
-      </BrowserRouter>
+      </main>
     </>
   );
 }

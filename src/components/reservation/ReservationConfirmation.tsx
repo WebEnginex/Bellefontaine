@@ -18,7 +18,8 @@ export const ReservationConfirmation = ({ id }: ReservationConfirmationProps) =>
         
         <div className="space-y-2 text-sm text-gray-600">
           <p>• Règlement : Le paiement se fera sur place</p>
-          <p>• Annulation : Si vous devez annuler, merci de nous en informer le plus tôt possible</p>
+          <p>• Gestion : Vous pouvez consulter et annuler vos réservations depuis votre compte</p>
+          <p>• Annulation : Si vous devez annuler, utilisez la page "Mon compte"</p>
         </div>
 
         <Button 
@@ -26,7 +27,7 @@ export const ReservationConfirmation = ({ id }: ReservationConfirmationProps) =>
           className="w-full mt-4"
           onClick={() => navigate("/account")}
         >
-          Voir mes réservations
+          Gérer mes réservations
         </Button>
       </div>
     </div>

@@ -13,3 +13,4 @@ export * from "./toast";
 export * from "./use-toast";
 export * from "./textarea";
 export * from "./table";
+export * from "./select";

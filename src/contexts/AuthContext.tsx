@@ -83,7 +83,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             last_name: lastName,
             full_name: `${firstName} ${lastName}`,
           },
-          emailRedirectTo: `${window.location.origin}/auth`
+          emailRedirectTo: import.meta.env.VITE_APP_URL ? 
+            `${import.meta.env.VITE_APP_URL}/auth` :
+            `${window.location.origin}/auth`
         }
       });
 

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CircuitCard } from "@/components/reservation/CircuitCard";
@@ -8,7 +8,30 @@ import { useReservation } from "@/hooks/useReservation";
 import { ReservationHeader } from "@/components/reservation/ReservationHeader";
 import { SlotList } from "@/components/reservation/SlotList";
 import { PilotSelection } from "@/components/reservation/PilotSelection";
-import { ReservationConfirmation } from "@/components/reservation/ReservationConfirmation";
+import { ToastAction } from "@/components/ui/toast";
+import { useEffect } from "react";
+
+const ToastContent = () => {
+  const navigate = useNavigate();
+  return (
+    <div className="space-y-4">
+      <div>
+        <p>Votre réservation a bien été enregistrée.</p>
+      </div>
+      <div className="space-y-2 text-sm text-muted-foreground">
+        <p>• Règlement : Le paiement se fera sur place</p>
+        <p>• Gestion : Vous pouvez consulter et annuler vos réservations depuis votre compte</p>
+      </div>
+      <Button 
+        variant="outline" 
+        className="w-full"
+        onClick={() => navigate("/account")}
+      >
+        Voir mes réservations
+      </Button>
+    </div>
+  );
+};
 
 const Reserver = () => {
   const navigate = useNavigate();
@@ -32,20 +55,24 @@ const Reserver = () => {
     const success = await handleSubmit(e);
     
     if (success) {
-      toast.custom((id) => <ReservationConfirmation id={id} />, {
-        position: "top-center",
-        duration: 10000,
+      toast({
+        title: "✅ Réservation confirmée",
+        description: <ToastContent />,
+        duration: 5000,
       });
     }
   };
 
   if (!user) {
-    toast("Connexion requise", {
+    toast({
+      title: "Connexion requise",
       description: "Vous devez être connecté pour accéder à la page de réservation.",
-      action: {
-        label: "Se connecter",
-        onClick: () => navigate("/auth")
-      }
+      action: (
+        <ToastAction altText="Se connecter" onClick={() => navigate("/auth")}>
+          Se connecter
+        </ToastAction>
+      ),
+      duration: 5000,
     });
     navigate("/auth");
     return null;
@@ -81,15 +108,17 @@ const Reserver = () => {
                     <CircuitCard
                       title="Circuit Motocross"
                       description="Un circuit motocross technique avec des obstacles variés."
-                      image="https://cdn.pixabay.com/photo/2023/06/22/02/25/motocross-8080377_1280.jpg"
+                      image="https://images.pexels.com/photos/144336/pexels-photo-144336.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
                       isSelected={circuit === "motocross"}
                       onClick={() => {
                         const selectedSlot = slotsWithBookings?.find(slot => slot.date === selectedDate);
                         if (selectedSlot && selectedSlot.circuit_1_available > 0) {
                           setCircuit("motocross");
                         } else {
-                          toast("Circuit complet", {
-                            description: "Il n'y a plus de places disponibles sur ce circuit."
+                          toast({
+                            title: "Circuit complet",
+                            description: "Il n'y a plus de places disponibles sur ce circuit.",
+                            duration: 5000,
                           });
                         }
                       }}
@@ -101,6 +130,7 @@ const Reserver = () => {
                         "Pour pilotes expérimentés"
                       ]}
                     />
+
                     <CircuitCard
                       title="Circuit Supercross"
                       description="Un circuit supercross avec des enchainements rapides et techniques."
@@ -111,8 +141,10 @@ const Reserver = () => {
                         if (selectedSlot && selectedSlot.circuit_2_available > 0) {
                           setCircuit("supercross");
                         } else {
-                          toast("Circuit complet", {
-                            description: "Il n'y a plus de places disponibles sur ce circuit."
+                          toast({
+                            title: "Circuit complet",
+                            description: "Il n'y a plus de places disponibles sur ce circuit.",
+                            duration: 5000,
                           });
                         }
                       }}
@@ -128,23 +160,50 @@ const Reserver = () => {
                 </div>
 
                 {circuit && (
-                  <PilotSelection 
-                    numberOfPilots={numberOfPilots}
-                    onNumberOfPilotsChange={setNumberOfPilots}
-                  />
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-6 bg-white rounded-lg p-6 shadow-sm"
+                  >
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                      <div className="space-y-2">
+                        <h2 className="text-2xl font-semibold">Nombre de pilotes</h2>
+                        <p className="text-sm text-muted-foreground">
+                          {circuit === "motocross" ? 
+                            `${slotsWithBookings?.find(slot => slot.date === selectedDate)?.circuit_1_available || 0} places disponibles` :
+                            `${slotsWithBookings?.find(slot => slot.date === selectedDate)?.circuit_2_available || 0} places disponibles`
+                          }
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-4 w-full md:w-auto">
+                        <PilotSelection
+                          value={numberOfPilots}
+                          onChange={setNumberOfPilots}
+                          maxPilots={
+                            circuit === "motocross"
+                              ? slotsWithBookings?.find(slot => slot.date === selectedDate)?.circuit_1_available || 0
+                              : slotsWithBookings?.find(slot => slot.date === selectedDate)?.circuit_2_available || 0
+                          }
+                        />
+                        <Button
+                          type="submit"
+                          size="lg"
+                          className="w-full md:w-auto"
+                          disabled={isSubmitting || hasExistingBooking}
+                        >
+                          {isSubmitting ? "Réservation en cours..." : "Réserver"}
+                        </Button>
+                      </div>
+                    </div>
+                  </motion.div>
                 )}
               </motion.div>
             )}
-
-            <Button 
-              type="submit" 
-              className="w-full max-w-md mx-auto block mt-12"
-              disabled={isSubmitting || !selectedDate || !circuit || !numberOfPilots || hasExistingBooking}
-            >
-              {isSubmitting ? "Réservation en cours..." : hasExistingBooking ? "Vous avez déjà réservé ce créneau" : "Réserver"}
-            </Button>
           </form>
+        </div>
 
+        <div className="max-w-4xl mx-auto mt-24">
           <FAQ />
         </div>
       </div>

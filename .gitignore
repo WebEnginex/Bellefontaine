@@ -26,3 +26,4 @@ server/dist/
 
 # Variables d'environnement
 .env
+.env.production

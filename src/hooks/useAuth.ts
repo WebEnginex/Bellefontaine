@@ -26,6 +26,7 @@ export function useAuth() {
     // Écouter les changements d'auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -38,7 +39,7 @@ export function useAuth() {
     });
 
     if (error) throw error;
-    navigate('/dashboard');
+    navigate('/');
   };
 
   const signOut = async () => {

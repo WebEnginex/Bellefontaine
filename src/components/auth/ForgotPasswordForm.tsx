@@ -55,7 +55,9 @@ export default function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) 
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+        redirectTo: import.meta.env.VITE_APP_URL ? 
+          `${import.meta.env.VITE_APP_URL}/auth/reset-password` :
+          `${window.location.origin}/auth/reset-password`,
       });
 
       if (error) {

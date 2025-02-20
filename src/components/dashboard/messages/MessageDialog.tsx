@@ -13,26 +13,28 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
 interface MessageDialogProps {
+  open: boolean;
   message: Message | null;
   replyText: string;
   submitting: boolean;
   onOpenChange: (open: boolean) => void;
-  onReplyChange: (text: string) => void;
-  onReplySubmit: () => void;
+  onReplyTextChange: (text: string) => void;
+  onSubmit: () => void;
 }
 
 export const MessageDialog: React.FC<MessageDialogProps> = ({
+  open,
   message,
   replyText,
   submitting,
   onOpenChange,
-  onReplyChange,
-  onReplySubmit,
+  onReplyTextChange,
+  onSubmit,
 }) => {
   if (!message) return null;
 
   return (
-    <Dialog open={!!message} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Message de {message.full_name}</DialogTitle>
@@ -58,9 +60,9 @@ export const MessageDialog: React.FC<MessageDialogProps> = ({
             <h4 className="font-medium mb-2">Votre réponse :</h4>
             <Textarea
               value={replyText}
-              onChange={(e) => onReplyChange(e.target.value)}
+              onChange={(e) => onReplyTextChange(e.target.value)}
               placeholder="Écrivez votre réponse ici..."
-              className="min-h-[150px]"
+              className="min-h-[100px]"
             />
           </div>
 
@@ -68,11 +70,8 @@ export const MessageDialog: React.FC<MessageDialogProps> = ({
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Annuler
             </Button>
-            <Button 
-              onClick={onReplySubmit}
-              disabled={!replyText.trim() || submitting}
-            >
-              {submitting ? "Envoi en cours..." : "Envoyer la réponse"}
+            <Button onClick={onSubmit} disabled={submitting}>
+              {submitting ? "Envoi en cours..." : "Envoyer"}
             </Button>
           </div>
         </div>

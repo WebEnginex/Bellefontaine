@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { useQuery, useQueryClient, InvalidateQueryFilters } from "@tanstack/react-query";
+import React from "react";
+import { Booking } from "@/types/bookings";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Trash2, CheckCircle, XCircle } from "lucide-react";
-import { 
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
+import { Button, Card } from "@/components/ui";
+import { Check, X, Trash2 } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase/supabase-client";
+import { useToast } from "@/hooks/use-toast";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -17,33 +16,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
-  Badge,
-} from "@/components/ui";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase/supabase-client";
-import { Database } from "@/lib/supabase/types";
-
-type BookingStatus = 'pending' | 'confirmed' | 'cancelled';
-
-interface Booking {
-  id: string;
-  user_id: string;
-  slot_id: string;
-  status: BookingStatus;
-  created_at: string;
-  updated_at: string;
-  slot: {
-    date: string;
-    start_time: string;
-    end_time: string;
-  };
-  profiles: {
-    first_name: string;
-    last_name: string;
-    email: string;
-  };
-}
+} from "@/components/ui/alert-dialog";
 
 interface BookingsListProps {
   circuitNumber: number;
@@ -52,231 +25,195 @@ interface BookingsListProps {
 export const BookingsList = ({ circuitNumber }: BookingsListProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [isDeletingBooking, setIsDeletingBooking] = useState(false);
-  const [isUpdatingPayment, setIsUpdatingPayment] = useState(false);
+  const [bookingToDelete, setBookingToDelete] = React.useState<string | null>(null);
 
-  const { data: bookings, isLoading } = useQuery({
+  const { data: bookings, isLoading, error } = useQuery({
     queryKey: ["bookings", circuitNumber],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("bookings")
         .select(`
           *,
-          profiles (
-            email,
-            full_name
-          ),
-          slots (
-            date
-          )
+          slot:slots!slot_id(*),
+          profile:profiles!user_id(*)
         `)
         .eq("circuit_number", circuitNumber)
-        .order("created_at", { ascending: false });
+        .order("slot(date)", { ascending: true });
 
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error("Erreur lors du chargement des réservations:", error);
+        throw error;
+      }
+
+      return data as Booking[];
     },
   });
 
-  useEffect(() => {
-    const channel = supabase
-      .channel('bookings-list-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'bookings'
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["bookings"] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
-
-  const handleDeleteBooking = async (bookingId: string) => {
-    setIsDeletingBooking(true);
-    try {
-      const { error } = await supabase
-        .from("bookings")
-        .delete()
-        .eq("id", bookingId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Succès",
-        description: "La réservation a été supprimée",
-      });
-      
-      queryClient.invalidateQueries({ queryKey: ["bookings"] });
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsDeletingBooking(false);
-    }
-  };
-
   const handleUpdatePaymentStatus = async (bookingId: string, currentStatus: string) => {
-    setIsUpdatingPayment(true);
     try {
-      // Ensure we're using the exact string values that match the database constraint
       const newStatus = currentStatus === "paid" ? "pending" : "paid";
-      
       const { error } = await supabase
         .from("bookings")
         .update({ payment_status: newStatus })
         .eq("id", bookingId);
 
-      if (error) {
-        console.error("Update error:", error);
-        throw error;
-      }
+      if (error) throw error;
 
       toast({
         title: "Succès",
-        description: "Le statut du paiement a été mis à jour",
+        description: `Le statut de paiement a été ${newStatus === "paid" ? "confirmé" : "annulé"}`,
       });
       
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
     } catch (error: any) {
-      console.error("Error in handleUpdatePaymentStatus:", error);
       toast({
         title: "Erreur",
         description: error.message,
         variant: "destructive",
       });
-    } finally {
-      setIsUpdatingPayment(false);
     }
   };
 
-  const handleBookingAction = async (booking: Booking, action: 'confirm' | 'cancel') => {
+  const handleDeleteBooking = async () => {
+    if (!bookingToDelete) return;
+
     try {
       const { error } = await supabase
-        .from('bookings')
-        .update({ 
-          status: action === 'confirm' ? 'confirmed' : 'cancelled',
-          updated_at: new Date().toISOString()
-        } as Database['public']['Tables']['bookings']['Update'])
-        .eq('id', booking.id);
+        .from("bookings")
+        .delete()
+        .eq("id", bookingToDelete);
 
       if (error) throw error;
 
       toast({
-        title: `Réservation ${action === 'confirm' ? 'confirmée' : 'annulée'}`,
-        description: `La réservation a été ${action === 'confirm' ? 'confirmée' : 'annulée'} avec succès.`,
+        title: "Succès",
+        description: "La réservation a été annulée",
       });
-
-      queryClient.invalidateQueries({ queryKey: ['bookings'] } as InvalidateQueryFilters);
+      
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      setBookingToDelete(null);
     } catch (error: any) {
-      console.error(`Erreur lors de la ${action === 'confirm' ? 'confirmation' : 'annulation'} de la réservation:`, error);
       toast({
-        variant: "destructive",
         title: "Erreur",
         description: error.message,
+        variant: "destructive",
       });
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[200px]">
+        <span className="loading loading-spinner loading-md"></span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="p-6">
+        <p className="text-center text-red-500">
+          Erreur lors du chargement des réservations : {(error as Error).message}
+        </p>
+      </Card>
+    );
+  }
+
+  if (!bookings || bookings.length === 0) {
+    return (
+      <Card className="p-6">
+        <p className="text-center text-gray-500">
+          Aucune réservation trouvée
+        </p>
+      </Card>
+    );
+  }
+
+  // Grouper les réservations par date de créneau
+  const groupedBookings = bookings.reduce((acc, booking) => {
+    const date = booking.slot?.date || "Date inconnue";
+    if (!acc[date]) {
+      acc[date] = [];
+    }
+    acc[date].push(booking);
+    return acc;
+  }, {} as Record<string, Booking[]>);
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          Réservations {circuitNumber === 1 ? "Motocross" : "Supercross"}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div>Chargement...</div>
-        ) : !bookings || bookings.length === 0 ? (
-          <p className="text-muted-foreground">Aucune réservation trouvée.</p>
-        ) : (
-          <div className="space-y-4">
-            {bookings.map((booking) => (
-              <Card key={booking.id}>
-                <CardContent className="pt-6">
-                  <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
-                    <div className="space-y-2">
-                      <h3 className="font-semibold">
-                        {booking.profiles?.full_name || booking.profiles?.email}
+    <>
+      <div className="space-y-8">
+        {Object.entries(groupedBookings).map(([date, dateBookings]) => (
+          <div key={date} className="space-y-4">
+            <h2 className="text-lg font-semibold">
+              {date !== "Date inconnue" 
+                ? format(new Date(date), "EEEE d MMMM yyyy", { locale: fr })
+                : date}
+            </h2>
+            <div className="grid gap-4">
+              {dateBookings.map((booking) => (
+                <Card key={booking.id} className="p-4">
+                  <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex flex-col">
+                      <h3 className="text-lg font-medium">
+                        {booking.profile?.first_name} {booking.profile?.last_name}
                       </h3>
-                      <p className="text-sm text-muted-foreground">
-                        Date : {format(new Date(booking.slots.date), "dd MMMM yyyy", { locale: fr })}
+                      <p className="text-sm text-gray-600">
+                        {booking.number_of_pilots} pilote{booking.number_of_pilots > 1 ? "s" : ""}
                       </p>
-                      <p className="text-sm text-muted-foreground">
-                        Nombre de pilotes : {booking.number_of_pilots}
-                      </p>
-                      <div className="mt-2">
-                        <Badge 
-                          className={`${
-                            booking.payment_status === "paid" 
-                              ? "bg-success text-white" 
-                              : "bg-[#8E9196] text-white"
-                          }`}
-                        >
-                          Paiement : {booking.payment_status === "paid" ? "Payé" : "En attente"}
-                        </Badge>
-                      </div>
                     </div>
-                    <div className="flex gap-2 justify-end">
+                    <div className="flex items-center gap-2">
+                      {booking.payment_status === "paid" ? (
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleUpdatePaymentStatus(booking.id, booking.payment_status)}
+                          className="h-8 w-8"
+                        >
+                          <X className="h-4 w-4 text-gray-700" />
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="default"
+                          size="icon"
+                          onClick={() => handleUpdatePaymentStatus(booking.id, booking.payment_status)}
+                          className="h-8 w-8 bg-green-500 hover:bg-green-600"
+                        >
+                          <Check className="h-4 w-4" />
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => handleUpdatePaymentStatus(booking.id, booking.payment_status)}
-                        disabled={isUpdatingPayment}
+                        className="h-8 w-8 border-red-500 hover:bg-red-50"
+                        onClick={() => setBookingToDelete(booking.id)}
                       >
-                        {booking.payment_status === "paid" ? (
-                          <XCircle className="h-4 w-4" />
-                        ) : (
-                          <CheckCircle className="h-4 w-4" />
-                        )}
+                        <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            disabled={isDeletingBooking}
-                            className="hover:bg-transparent"
-                          >
-                            <Trash2 className="h-4 w-4 text-primary" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Êtes-vous sûr de vouloir supprimer cette réservation ? Cette action est irréversible.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Annuler</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDeleteBooking(booking.id)}
-                            >
-                              Supprimer
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                </Card>
+              ))}
+            </div>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        ))}
+      </div>
+
+      <AlertDialog open={!!bookingToDelete} onOpenChange={() => setBookingToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer l'annulation</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir annuler cette réservation ? Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteBooking}>
+              Confirmer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };

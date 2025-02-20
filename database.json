@@ -1,0 +1,160 @@
+{
+    "authentication": {
+      "provider": "Supabase Auth",
+      "users_table": "auth.users",
+      "description": "L'authentification est gérée par Supabase. Chaque utilisateur est stocké dans 'auth.users'. Les profils supplémentaires sont liés via 'profiles.id'.",
+      "columns": [
+        { "name": "id", "type": "uuid", "primary_key": true },
+        { "name": "display_name", "type": "text" },
+        { "name": "email", "type": "text", "unique": true },
+        { "name": "phone", "type": "text", "nullable": true },
+        { "name": "providers", "type": "text", "description": "Méthode d'authentification (email, Google, etc.)." },
+        { "name": "provider_type", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "last_sign_in_at", "type": "timestamptz", "nullable": true }
+      ]
+    },
+    "tables": [
+      {
+        "name": "profiles",
+        "description": "Stocke les informations supplémentaires des utilisateurs. Lié à auth.users.id.",
+        "columns": [
+          { "name": "id", "type": "uuid", "primary_key": true, "foreign_key": "auth.users.id" },
+          { "name": "email", "type": "text" },
+          { "name": "full_name", "type": "text" },
+          { "name": "role", "type": "user_role", "description": "Définit le rôle de l'utilisateur (admin, user, etc.)" },
+          { "name": "created_at", "type": "timestamptz" },
+          { "name": "updated_at", "type": "timestamptz" },
+          { "name": "first_name", "type": "text" },
+          { "name": "last_name", "type": "text" }
+        ],
+        "policies": [
+          {
+            "action": "INSERT",
+            "description": "Les utilisateurs peuvent insérer leur propre profil.",
+            "role": "public"
+          },
+          {
+            "action": "UPDATE",
+            "description": "Les utilisateurs peuvent modifier leur propre profil.",
+            "role": "public"
+          },
+          {
+            "action": "SELECT",
+            "description": "Les utilisateurs peuvent voir leur propre profil.",
+            "role": "public"
+          }
+        ]
+      },
+      {
+        "name": "bookings",
+        "description": "Enregistre les réservations des utilisateurs.",
+        "columns": [
+          { "name": "id", "type": "uuid", "primary_key": true },
+          { "name": "user_id", "type": "uuid", "foreign_key": "profiles.id", "description": "Utilisateur ayant fait la réservation." },
+          { "name": "slot_id", "type": "uuid", "foreign_key": "slots.id", "description": "Créneau réservé." },
+          { "name": "circuit_number", "type": "int4" },
+          { "name": "number_of_pilots", "type": "int4" },
+          { "name": "created_at", "type": "timestamptz" },
+          { "name": "updated_at", "type": "timestamptz" },
+          { "name": "payment_status", "type": "text", "description": "Statut du paiement (payé, en attente, annulé)." }
+        ],
+        "policies": [
+          {
+            "action": "INSERT",
+            "description": "Les utilisateurs authentifiés peuvent créer leurs propres réservations.",
+            "role": "authenticated"
+          },
+          {
+            "action": "SELECT",
+            "description": "Les utilisateurs authentifiés peuvent voir leurs propres réservations.",
+            "role": "authenticated"
+          },
+          {
+            "action": "SELECT",
+            "description": "Les utilisateurs publics peuvent voir leurs propres réservations.",
+            "role": "public"
+          },
+          {
+            "action": "UPDATE",
+            "description": "Les administrateurs peuvent mettre à jour les réservations.",
+            "role": "authenticated"
+          },
+          {
+            "action": "DELETE",
+            "description": "Les administrateurs peuvent supprimer toutes les réservations.",
+            "role": "authenticated"
+          },
+          {
+            "action": "DELETE",
+            "description": "Les utilisateurs peuvent supprimer leurs propres réservations.",
+            "role": "authenticated"
+          }
+        ]
+      },
+      {
+        "name": "slots",
+        "description": "Liste des créneaux disponibles pour réservation.",
+        "columns": [
+          { "name": "id", "type": "uuid", "primary_key": true },
+          { "name": "date", "type": "date", "description": "Date du créneau." },
+          { "name": "circuit_1_capacity", "type": "int4" },
+          { "name": "circuit_2_capacity", "type": "int4" },
+          { "name": "created_at", "type": "timestamptz" },
+          { "name": "updated_at", "type": "timestamptz" },
+          { "name": "circuit_1_available", "type": "int4" },
+          { "name": "circuit_2_available", "type": "int4" }
+        ],
+        "policies": [
+          {
+            "action": "SELECT",
+            "description": "Les utilisateurs authentifiés peuvent voir les créneaux disponibles.",
+            "role": "authenticated"
+          },
+          {
+            "action": "ALL",
+            "description": "Les administrateurs peuvent gérer tous les créneaux.",
+            "role": "authenticated"
+          }
+        ]
+      },
+      {
+        "name": "contact_messages",
+        "description": "Stocke les messages de contact envoyés par les utilisateurs.",
+        "columns": [
+          { "name": "id", "type": "uuid", "primary_key": true },
+          { "name": "full_name", "type": "text" },
+          { "name": "email", "type": "text" },
+          { "name": "message", "type": "text" },
+          { "name": "status", "type": "message_status" },
+          { "name": "admin_response", "type": "text" },
+          { "name": "created_at", "type": "timestamptz" },
+          { "name": "updated_at", "type": "timestamptz" },
+          { "name": "read", "type": "bool" }
+        ],
+        "policies": [
+          {
+            "action": "INSERT",
+            "description": "Tout le monde peut envoyer un message.",
+            "role": "anon"
+          },
+          {
+            "action": "SELECT",
+            "description": "Les administrateurs peuvent voir tous les messages.",
+            "role": "authenticated"
+          },
+          {
+            "action": "UPDATE",
+            "description": "Les administrateurs peuvent modifier les messages.",
+            "role": "authenticated"
+          },
+          {
+            "action": "DELETE",
+            "description": "Les administrateurs peuvent supprimer des messages.",
+            "role": "authenticated"
+          }
+        ]
+      }
+    ]
+  }
+  
