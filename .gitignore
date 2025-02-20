@@ -9,7 +9,7 @@ lerna-debug.log*
 
 node_modules
 
-# Build output
+# Build output.
 server/dist/
 *.local
 
