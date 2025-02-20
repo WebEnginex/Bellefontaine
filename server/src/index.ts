@@ -27,7 +27,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Serve static files
+// Serve static files.
 app.use(express.static(DIST_DIR));
 
 // Initialize Supabase client
