@@ -2,16 +2,16 @@
 FROM node:18-alpine AS builder
 
 # Installation des dépendances système nécessaires pour la compilation
-RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 make g++ wget
 
 WORKDIR /app
 
 # Copie des fichiers package*.json
 COPY package*.json ./
 
-# Installation des dépendances
-RUN npm config set network-timeout 60000
-RUN npm ci --only=production --legacy-peer-deps
+# Installation des dépendances avec un timeout plus long
+ENV NPM_CONFIG_NETWORK_TIMEOUT=100000
+RUN npm install --legacy-peer-deps
 
 # Copie du reste des fichiers du projet
 COPY . .
@@ -23,6 +23,9 @@ RUN npm run build
 FROM node:18-alpine
 
 WORKDIR /app
+
+# Installation de wget pour le healthcheck
+RUN apk add --no-cache wget
 
 # Copie des fichiers nécessaires depuis le stage de build
 COPY --from=builder /app/dist ./dist
@@ -36,6 +39,10 @@ ENV PORT=3000
 
 # Exposition du port (Railway ignorera cette valeur et utilisera son propre port)
 EXPOSE ${PORT}
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/health || exit 1
 
 # Script de démarrage
 CMD ["node", "server/dist/index.js"]
