@@ -10,7 +10,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "start": "vite preview"
+    "start": "serve -s dist"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.2",
@@ -74,6 +74,7 @@
     "@vitejs/plugin-react-swc": "^3.3.2",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.31",
+    "serve": "^14.2.4",
     "tailwindcss": "^3.3.5",
     "vite": "^4.4.5"
   }

@@ -9,13 +9,5 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-  },
-  preview: {
-    host: true, // Nécessaire pour écouter sur toutes les interfaces
-    port: Number(process.env.PORT) || 3000,
-  },
-  server: {
-    host: true, // Nécessaire pour écouter sur toutes les interfaces
-    port: Number(process.env.PORT) || 3000,
   }
 })
