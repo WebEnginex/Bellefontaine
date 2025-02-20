@@ -21,7 +21,7 @@ COPY . .
 # Build de l'application
 RUN npm run build
 
-# Production stage
+# Production stage.
 FROM node:18-alpine
 
 WORKDIR /app
