@@ -21,7 +21,7 @@ app.get('/health', (req, res) => {
         env: process.env.NODE_ENV
     });
 });
-// Serve static files
+// Serve static files.
 app.use(express.static(DIST_DIR));
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL || '';

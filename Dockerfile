@@ -9,14 +9,14 @@ WORKDIR /app
 # Copie des fichiers package*.json
 COPY package*.json ./
 
-# Installation des dépendances avec un timeout plus long
-ENV NPM_CONFIG_NETWORK_TIMEOUT=100000
-RUN npm install --legacy-peer-deps
+# Installation des dépendances en mode production seulement
+RUN npm install --production --frozen-lockfile
 
 # Copie du reste des fichiers du projet
 COPY . .
 
-# Build de l'application
+# Installation des dépendances de développement pour le build
+RUN npm install --frozen-lockfile
 RUN npm run build
 
 # Production stage
@@ -31,6 +31,8 @@ RUN apk add --no-cache wget
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/server/dist ./server/dist
 COPY --from=builder /app/package*.json ./
+
+# Installation des dépendances de production uniquement
 COPY --from=builder /app/node_modules ./node_modules
 
 # Variables d'environnement
