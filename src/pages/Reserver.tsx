@@ -108,7 +108,7 @@ const Reserver = () => {
                     <CircuitCard
                       title="Circuit Motocross"
                       description="Un circuit motocross technique avec des obstacles variés."
-                      image="https://images.pexels.com/photos/144336/pexels-photo-144336.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+                      image="../../public/images_reserver/reserver_motocross.webp"
                       isSelected={circuit === "motocross"}
                       onClick={() => {
                         const selectedSlot = slotsWithBookings?.find(slot => slot.date === selectedDate);
@@ -134,7 +134,7 @@ const Reserver = () => {
                     <CircuitCard
                       title="Circuit Supercross"
                       description="Un circuit supercross avec des enchainements rapides et techniques."
-                      image="https://images.pexels.com/photos/217872/pexels-photo-217872.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+                      image="../../public/images_reserver/reserver_supercross.webp"
                       isSelected={circuit === "supercross"}
                       onClick={() => {
                         const selectedSlot = slotsWithBookings?.find(slot => slot.date === selectedDate);
