@@ -10,6 +10,8 @@ import { SlotList } from "@/components/reservation/SlotList";
 import { PilotSelection } from "@/components/reservation/PilotSelection";
 import { ToastAction } from "@/components/ui/toast";
 import { useEffect } from "react";
+import motocrossImage from "/images_reserver/reserver_motocross.webp";
+import supercrossImage from "/images_reserver/reserver_supercross.webp";
 
 const ToastContent = () => {
   const navigate = useNavigate();
@@ -108,7 +110,7 @@ const Reserver = () => {
                     <CircuitCard
                       title="Circuit Motocross"
                       description="Un circuit motocross technique avec des obstacles variés."
-                      image="../../public/images_reserver/reserver_motocross.webp"
+                      image={motocrossImage}
                       isSelected={circuit === "motocross"}
                       onClick={() => {
                         const selectedSlot = slotsWithBookings?.find(slot => slot.date === selectedDate);
@@ -134,7 +136,7 @@ const Reserver = () => {
                     <CircuitCard
                       title="Circuit Supercross"
                       description="Un circuit supercross avec des enchainements rapides et techniques."
-                      image="../../public/images_reserver/reserver_supercross.webp"
+                      image={supercrossImage}
                       isSelected={circuit === "supercross"}
                       onClick={() => {
                         const selectedSlot = slotsWithBookings?.find(slot => slot.date === selectedDate);
