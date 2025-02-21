@@ -10,8 +10,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "start": "serve -s dist",
-    "api": "node api/index.js"
+    "start": "node server/index.js",
+    "api": "node server/index.js"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

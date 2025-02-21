@@ -1,31 +1,38 @@
-# Étape de construction
+# Étape de build
 FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copier les fichiers nécessaires
+# Copier les fichiers de configuration
 COPY package*.json ./
 COPY server/package*.json ./server/
 COPY tsconfig.json ./
 COPY vite.config.ts ./
 COPY tailwind.config.ts ./
-COPY . .
+COPY postcss.config.js ./
 
-# Installer toutes les dépendances
+# Installer les dépendances
 RUN npm install
 
-# Compiler le projet TypeScript et builder le front
+# Copier le code source
+COPY . .
+
+# Build du front-end
 RUN npm run build
+
+# Build du serveur
+WORKDIR /app/server
+RUN npm ci --only=production
 
 # Étape de production
 FROM node:18-alpine
 
 WORKDIR /app
 
-# Copier les fichiers depuis l'étape de build
+# Copier les fichiers nécessaires depuis l'étape de build
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/server/node_modules ./server/node_modules
 COPY --from=builder /app/server ./server
-COPY --from=builder /app/node_modules ./node_modules
 
 # Exposer le port
 EXPOSE 3000
@@ -33,5 +40,5 @@ EXPOSE 3000
 # Définir l'environnement de production
 ENV NODE_ENV=production
 
-# Lancer l'application
-CMD ["serve", "-s", "dist"]
+# Lancer le serveur
+CMD ["node", "server/index.js"]
