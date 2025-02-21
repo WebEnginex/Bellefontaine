@@ -1,13 +1,18 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+// Vérification des variables d'environnement
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables')
+  console.error('Variables Supabase manquantes:');
+  console.error('VITE_SUPABASE_URL:', supabaseUrl ? 'Définie' : 'Manquante');
+  console.error('VITE_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'Définie' : 'Manquante');
+  throw new Error('Les variables d\'environnement Supabase sont requises');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Création du client Supabase
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Types pour TypeScript
 export type Database = {
@@ -35,3 +40,5 @@ export type Database = {
     }
   }
 }
+
+export type { User, Session } from '@supabase/supabase-js';
