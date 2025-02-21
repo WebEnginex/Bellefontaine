@@ -12,6 +12,15 @@ const __dirname = dirname(__filename);
 // Charger .env depuis la racine du projet
 dotenv.config({ path: join(__dirname, '../.env') });
 
+// Vérifier les variables d'environnement requises
+const requiredEnvVars = ['SENDGRID_API_KEY', 'SENDGRID_FROM_EMAIL'];
+const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingEnvVars.length > 0) {
+  console.error('Variables d\'environnement manquantes:', missingEnvVars);
+  process.exit(1);
+}
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -27,10 +36,6 @@ app.use(cors({
 app.use(express.json());
 
 // Configuration de SendGrid
-if (!process.env.SENDGRID_API_KEY) {
-  console.error('SENDGRID_API_KEY non définie !');
-  process.exit(1);
-}
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // Route pour envoyer des emails
@@ -50,23 +55,28 @@ app.post('/api/send-email', async (req, res) => {
 
     console.log('Préparation de l\'envoi:', {
       to,
-      from: process.env.SENDGRID_FROM_EMAIL || 'contact@circuitdebellefontaine.fr',
+      from: process.env.SENDGRID_FROM_EMAIL,
       templateId,
       dynamicTemplateData
     });
     
-    await sgMail.send({
+    const msg = {
       to,
       from: {
-        email: process.env.SENDGRID_FROM_EMAIL || 'contact@circuitdebellefontaine.fr',
+        email: process.env.SENDGRID_FROM_EMAIL,
         name: 'Circuit de Bellefontaine'
       },
       templateId,
       dynamicTemplateData
-    });
+    };
 
-    console.log('Email envoyé avec succès à:', to);
-    res.json({ success: true });
+    const response = await sgMail.send(msg);
+    console.log('Email envoyé avec succès:', response[0]);
+    
+    res.json({ 
+      success: true,
+      messageId: response[0]?.headers['x-message-id']
+    });
   } catch (error) {
     console.error('Erreur détaillée SendGrid:', {
       message: error.message,
@@ -91,8 +101,11 @@ app.get('*', (req, res) => {
 // Démarrage du serveur
 const server = app.listen(PORT, () => {
   console.log(`Serveur démarré sur le port ${PORT}`);
-  console.log('Variables d\'environnement chargées:');
+  console.log('Configuration:');
+  console.log('- PORT:', PORT);
+  console.log('- NODE_ENV:', process.env.NODE_ENV);
   console.log('- FRONTEND_URL:', process.env.FRONTEND_URL);
+  console.log('- SENDGRID_FROM_EMAIL:', process.env.SENDGRID_FROM_EMAIL);
   console.log('- SENDGRID_API_KEY:', process.env.SENDGRID_API_KEY ? 'Définie' : 'Non définie');
 });
 

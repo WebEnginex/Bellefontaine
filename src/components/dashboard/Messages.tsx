@@ -172,9 +172,12 @@ const Messages = () => {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
+        const errorData = await response.json();
+        console.error('Détails de l\'erreur:', errorData);
+        throw new Error(errorData.details || 'Erreur lors de l\'envoi de l\'email');
       }
+
+      const data = await response.json();
 
       toast({
         title: "Succès",
