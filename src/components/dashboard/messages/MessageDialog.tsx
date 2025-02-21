@@ -35,29 +35,27 @@ export const MessageDialog: React.FC<MessageDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle>Message de {message.full_name}</DialogTitle>
+          <DialogTitle>Répondre au message</DialogTitle>
           <DialogDescription>
-            Reçu le {format(new Date(message.created_at), "dd MMMM yyyy à HH:mm", { locale: fr })}
+            De : {message.full_name} ({message.email})
+            <br />
+            Date :{" "}
+            {format(new Date(message.created_at), "dd/MM/yyyy HH:mm", {
+              locale: fr,
+            })}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 py-4">
           <div>
-            <h4 className="font-medium mb-2">Message original :</h4>
-            <p className="text-gray-700 whitespace-pre-wrap">{message.message}</p>
+            <h4 className="text-sm font-medium mb-2">Message :</h4>
+            <p className="text-sm text-muted-foreground">{message.message}</p>
           </div>
 
-          {message.admin_response && (
-            <div>
-              <h4 className="font-medium mb-2">Réponse précédente :</h4>
-              <p className="text-gray-700 whitespace-pre-wrap">{message.admin_response}</p>
-            </div>
-          )}
-
           <div>
-            <h4 className="font-medium mb-2">Votre réponse :</h4>
+            <h4 className="text-sm font-medium mb-2">Votre réponse :</h4>
             <Textarea
               value={replyText}
               onChange={(e) => onReplyTextChange(e.target.value)}
@@ -65,15 +63,15 @@ export const MessageDialog: React.FC<MessageDialogProps> = ({
               className="min-h-[100px]"
             />
           </div>
+        </div>
 
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Annuler
-            </Button>
-            <Button onClick={onSubmit} disabled={submitting}>
-              {submitting ? "Envoi en cours..." : "Envoyer"}
-            </Button>
-          </div>
+        <div className="flex justify-end gap-3">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Annuler
+          </Button>
+          <Button onClick={onSubmit} disabled={submitting}>
+            {submitting ? "Envoi en cours..." : "Envoyer"}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

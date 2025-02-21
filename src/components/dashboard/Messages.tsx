@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/supabase-client";
 import { useToast } from "@/hooks/use-toast";
-import { Message } from "@/types/messages";
+import { Message, MessageStatus } from "@/types/messages";
 import { 
   Button,
   Card,
@@ -15,6 +15,9 @@ import { MessageDialog } from "./messages/MessageDialog";
 import { DeleteConfirmDialog } from "./messages/DeleteConfirmDialog";
 import { MessagesFilter } from "./messages/MessagesFilter";
 
+// Initialiser SendGrid avec la clé API
+// sgMail.setApiKey(import.meta.env.VITE_SENDGRID_API_KEY || '');
+
 type MessagesState = {
   replyText: { [key: string]: string };
   submitting: { [key: string]: boolean };
@@ -22,8 +25,7 @@ type MessagesState = {
   deleteConfirmOpen: boolean;
   messageToDelete: string | null;
   filters: {
-    read: boolean | null;
-    replied: boolean | null;
+    status: MessageStatus | null;
     text: string;
   };
 };
@@ -36,8 +38,7 @@ const Messages = () => {
     deleteConfirmOpen: false,
     messageToDelete: null,
     filters: {
-      read: null,
-      replied: null,
+      status: null,
       text: "",
     },
   });
@@ -53,7 +54,16 @@ const Messages = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as Message[];
+      
+      // Convertir les messages en ajoutant le bon statut
+      return (data as any[]).map(message => ({
+        ...message,
+        status: message.read 
+          ? message.status === "replied"
+            ? "replied" as const
+          : "pending" as const
+          : "unread" as const
+      })) as Message[];
     },
   });
 
@@ -62,6 +72,39 @@ const Messages = () => {
       ...prev,
       selectedMessage: message,
     }));
+
+    // Marquer le message comme lu s'il ne l'est pas déjà
+    if (!message.read) {
+      try {
+        const { error } = await supabase
+          .from("contact_messages")
+          .update({
+            read: true,
+            status: message.admin_response ? "replied" : "pending"
+          })
+          .eq("id", message.id)
+          .select()
+          .single();
+
+        if (error) {
+          console.error("Erreur lors de la mise à jour du message:", error);
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible de marquer le message comme lu",
+          });
+        } else {
+          refetch();
+        }
+      } catch (err) {
+        console.error("Erreur lors de la mise à jour du message:", err);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de marquer le message comme lu",
+        });
+      }
+    }
   };
 
   const handleReplyTextChange = (text: string) => {
@@ -96,41 +139,61 @@ const Messages = () => {
     }));
 
     try {
-      const { error } = await supabase
+      // Mettre à jour la base de données
+      const { error: dbError } = await supabase
         .from("contact_messages")
-        .update({
+        .update({ 
           admin_response: replyText,
-          status: "replied",
+          status: "replied" as const,
+          read: true
         })
-        .eq("id", messageId);
+        .eq("id", messageId)
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (dbError) {
+        throw dbError;
+      }
 
-      toast({
-        title: "Réponse envoyée",
-        description: "La réponse a été enregistrée avec succès",
+      // Envoyer l'email via notre serveur Express
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/send-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: state.selectedMessage.email,
+          templateId: 'd-836eba9453584f04a390bfadc624ea8b',
+          dynamicTemplateData: {
+            to_name: state.selectedMessage.full_name || 'Client',
+            message: replyText
+          }
+        })
       });
 
-      await refetch();
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
 
-      setState(prev => ({
-        ...prev,
-        selectedMessage: null,
-        replyText: { ...prev.replyText, [messageId]: "" },
-        submitting: { ...prev.submitting, [messageId]: false },
-      }));
-
-    } catch (error: any) {
-      console.error("Error sending reply:", error);
+      toast({
+        title: "Succès",
+        description: "Réponse envoyée avec succès",
+      });
+      refetch();
+    } catch (err) {
+      console.error("Erreur lors de l'envoi de la réponse:", err);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'envoi de la réponse",
+        description: "Impossible d'envoyer la réponse",
       });
-
+    } finally {
       setState(prev => ({
         ...prev,
         submitting: { ...prev.submitting, [messageId]: false },
+        selectedMessage: null,
+        replyText: {},
       }));
     }
   };
@@ -138,89 +201,78 @@ const Messages = () => {
   const handleDeleteClick = (id: string) => {
     setState(prev => ({
       ...prev,
-      messageToDelete: id,
       deleteConfirmOpen: true,
+      messageToDelete: id,
     }));
   };
 
-  const handleDeleteMessage = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from("contact_messages")
-        .delete()
-        .eq("id", id);
+  const handleDeleteConfirm = async () => {
+    if (!state.messageToDelete) return;
 
-      if (error) throw error;
+    const { error } = await supabase
+      .from("contact_messages")
+      .delete()
+      .eq("id", state.messageToDelete);
 
-      toast({
-        title: "Message supprimé",
-        description: "Le message a été supprimé avec succès",
-      });
+    setState(prev => ({
+      ...prev,
+      deleteConfirmOpen: false,
+      messageToDelete: null,
+    }));
 
-      setState(prev => ({
-        ...prev,
-        deleteConfirmOpen: false,
-        messageToDelete: null,
-      }));
-
-      await refetch();
-    } catch (error: any) {
-      console.error("Erreur lors de la suppression du message:", error);
+    if (error) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message,
+        description: "Impossible de supprimer le message",
       });
+    } else {
+      toast({
+        title: "Succès",
+        description: "Message supprimé avec succès",
+      });
+      refetch();
     }
   };
 
-  const handleMessageDialogOpenChange = (open: boolean) => {
-    if (!open) {
-      setState(prev => ({
-        ...prev,
-        selectedMessage: null,
-      }));
+  const handleDeleteCancel = () => {
+    setState(prev => ({
+      ...prev,
+      deleteConfirmOpen: false,
+      messageToDelete: null,
+    }));
+  };
+
+  const filteredMessages = messages?.filter(message => {
+    if (state.filters.status && message.status !== state.filters.status) {
+      return false;
     }
-  };
-
-  const handleFilterChange = (text: string) => {
-    setState(prev => ({
-      ...prev,
-      filters: { ...prev.filters, text },
-    }));
-  };
-
-  const handleReadFilterChange = (read: boolean | null) => {
-    setState(prev => ({
-      ...prev,
-      filters: { ...prev.filters, read },
-    }));
-  };
-
-  const handleRepliedFilterChange = (replied: boolean | null) => {
-    setState(prev => ({
-      ...prev,
-      filters: { ...prev.filters, replied },
-    }));
-  };
+    if (state.filters.text) {
+      const searchText = state.filters.text.toLowerCase();
+      return (
+        message.full_name.toLowerCase().includes(searchText) ||
+        message.email.toLowerCase().includes(searchText) ||
+        message.message.toLowerCase().includes(searchText)
+      );
+    }
+    return true;
+  });
 
   return (
-    <Card className="w-full overflow-hidden">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <span>Messages de contact</span>
-          <MessagesFilter
-            filters={state.filters}
-            onFilterChange={handleFilterChange}
-            onReadFilterChange={handleReadFilterChange}
-            onRepliedFilterChange={handleRepliedFilterChange}
-          />
-        </CardTitle>
+        <CardTitle>Messages de contact</CardTitle>
       </CardHeader>
-      <CardContent className="p-0 sm:p-6">
-        <div className="overflow-x-auto">
+      <CardContent>
+        <MessagesFilter
+          filters={state.filters}
+          onFiltersChange={(filters) =>
+            setState((prev) => ({ ...prev, filters }))
+          }
+        />
+        <div className="mt-6">
           <MessagesTable
-            messages={messages || []}
+            messages={filteredMessages || []}
             onMessageSelect={handleMessageSelect}
             onDeleteClick={handleDeleteClick}
           />
@@ -230,17 +282,27 @@ const Messages = () => {
       <MessageDialog
         open={!!state.selectedMessage}
         message={state.selectedMessage}
-        replyText={state.replyText[state.selectedMessage?.id || ""] || ""}
+        replyText={
+          state.selectedMessage
+            ? state.replyText[state.selectedMessage.id] || ""
+            : ""
+        }
+        submitting={
+          state.selectedMessage
+            ? state.submitting[state.selectedMessage.id] || false
+            : false
+        }
         onReplyTextChange={handleReplyTextChange}
         onSubmit={handleReplySubmit}
-        submitting={state.submitting[state.selectedMessage?.id || ""] || false}
-        onOpenChange={handleMessageDialogOpenChange}
+        onOpenChange={(open) => {
+          if (!open) setState((prev) => ({ ...prev, selectedMessage: null }));
+        }}
       />
 
       <DeleteConfirmDialog
         open={state.deleteConfirmOpen}
-        onOpenChange={(open) => setState(prev => ({ ...prev, deleteConfirmOpen: open }))}
-        onConfirm={() => state.messageToDelete && handleDeleteMessage(state.messageToDelete)}
+        onConfirm={handleDeleteConfirm}
+        onOpenChange={handleDeleteCancel}
       />
     </Card>
   );
