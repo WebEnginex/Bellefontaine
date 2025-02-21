@@ -18,6 +18,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Configuration de SendGrid
+console.log("SendGrid API Key chargée:", process.env.SENDGRID_API_KEY);
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // Route pour envoyer des emails
