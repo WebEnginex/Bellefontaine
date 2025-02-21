@@ -21,6 +21,18 @@ if (missingEnvVars.length > 0) {
   process.exit(1);
 }
 
+// Vérifier que la clé API SendGrid est valide
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY?.trim();
+const SENDGRID_FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL?.trim();
+
+if (!SENDGRID_API_KEY || SENDGRID_API_KEY.length < 50) {
+  console.error('SENDGRID_API_KEY invalide ou trop courte');
+  process.exit(1);
+}
+
+// Configuration de SendGrid
+sgMail.setApiKey(SENDGRID_API_KEY);
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -35,13 +47,30 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Configuration de SendGrid
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+// Route pour vérifier la configuration SendGrid
+app.get('/api/check-config', async (req, res) => {
+  try {
+    await sgMail.send({
+      to: SENDGRID_FROM_EMAIL,
+      from: SENDGRID_FROM_EMAIL,
+      subject: 'Test de configuration SendGrid',
+      text: 'Si vous recevez cet email, la configuration SendGrid fonctionne correctement.'
+    });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Erreur de configuration SendGrid',
+      details: error.message,
+      code: error.code
+    });
+  }
+});
 
 // Route pour envoyer des emails
 app.post('/api/send-email', async (req, res) => {
   try {
     console.log('Requête reçue:', req.body);
+    console.log('API Key utilisée:', `${SENDGRID_API_KEY.substring(0, 10)}...`);
     
     const { to, templateId, dynamicTemplateData } = req.body;
     
@@ -53,29 +82,31 @@ app.post('/api/send-email', async (req, res) => {
       });
     }
 
-    console.log('Préparation de l\'envoi:', {
-      to,
-      from: process.env.SENDGRID_FROM_EMAIL,
-      templateId,
-      dynamicTemplateData
-    });
-    
     const msg = {
       to,
       from: {
-        email: process.env.SENDGRID_FROM_EMAIL,
+        email: SENDGRID_FROM_EMAIL,
         name: 'Circuit de Bellefontaine'
       },
       templateId,
       dynamicTemplateData
     };
 
-    const response = await sgMail.send(msg);
-    console.log('Email envoyé avec succès:', response[0]);
+    console.log('Configuration email:', {
+      ...msg,
+      from: SENDGRID_FROM_EMAIL,
+      apiKeyLength: SENDGRID_API_KEY.length
+    });
+
+    const [response] = await sgMail.send(msg);
+    console.log('Email envoyé avec succès:', {
+      statusCode: response.statusCode,
+      headers: response.headers
+    });
     
     res.json({ 
       success: true,
-      messageId: response[0]?.headers['x-message-id']
+      messageId: response?.headers['x-message-id']
     });
   } catch (error) {
     console.error('Erreur détaillée SendGrid:', {
@@ -105,8 +136,8 @@ const server = app.listen(PORT, () => {
   console.log('- PORT:', PORT);
   console.log('- NODE_ENV:', process.env.NODE_ENV);
   console.log('- FRONTEND_URL:', process.env.FRONTEND_URL);
-  console.log('- SENDGRID_FROM_EMAIL:', process.env.SENDGRID_FROM_EMAIL);
-  console.log('- SENDGRID_API_KEY:', process.env.SENDGRID_API_KEY ? 'Définie' : 'Non définie');
+  console.log('- SENDGRID_FROM_EMAIL:', SENDGRID_FROM_EMAIL);
+  console.log('- SENDGRID_API_KEY:', `${SENDGRID_API_KEY.substring(0, 10)}...`);
 });
 
 // Gestion gracieuse de l'arrêt
