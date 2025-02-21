@@ -194,10 +194,15 @@ const Reserver = () => {
                           className="w-full md:w-auto"
                           disabled={isSubmitting || hasExistingBooking}
                         >
-                          {isSubmitting ? "Réservation en cours..." : "Réserver"}
+                          {isSubmitting ? "Réservation en cours..." : hasExistingBooking ? "Réservation existante" : "Réserver"}
                         </Button>
                       </div>
                     </div>
+                    {hasExistingBooking && (
+                      <div className="mt-2 text-red-500 text-sm">
+                        Vous avez déjà une réservation en cours pour ce créneau
+                      </div>
+                    )}
                   </motion.div>
                 )}
               </motion.div>

@@ -25,6 +25,14 @@ if (missingEnvVars.length > 0) {
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY?.trim();
 const SENDGRID_FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL?.trim();
 
+if (!SENDGRID_API_KEY) {
+  console.error('SENDGRID_API_KEY manquante dans les variables d\'environnement');
+}
+
+if (!SENDGRID_FROM_EMAIL) {
+  console.error('SENDGRID_FROM_EMAIL manquante dans les variables d\'environnement');
+}
+
 if (!SENDGRID_API_KEY || SENDGRID_API_KEY.length < 50) {
   console.error('SENDGRID_API_KEY invalide ou trop courte');
   process.exit(1);
@@ -39,12 +47,12 @@ const PORT = process.env.PORT || 3001;
 // Middleware pour servir les fichiers statiques du build Vite
 app.use(express.static(join(__dirname, '../dist')));
 
-// Middleware CORS et JSON
+// Configuration CORS
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: 'http://localhost:5173', // URL du frontend en développement
+  credentials: true
 }));
+
 app.use(express.json());
 
 // Route pour vérifier la configuration SendGrid
@@ -66,21 +74,23 @@ app.get('/api/check-config', async (req, res) => {
   }
 });
 
-// Route pour envoyer des emails
+// Endpoint pour envoyer des emails
 app.post('/api/send-email', async (req, res) => {
   try {
-    console.log('Requête reçue:', req.body);
-    console.log('API Key utilisée:', `${SENDGRID_API_KEY.substring(0, 10)}...`);
-    
     const { to, templateId, dynamicTemplateData } = req.body;
-    
+
     if (!to || !templateId || !dynamicTemplateData) {
-      console.error('Données manquantes:', { to, templateId, dynamicTemplateData });
       return res.status(400).json({ 
         error: 'Données manquantes',
         details: 'to, templateId et dynamicTemplateData sont requis'
       });
     }
+
+    console.log('Tentative d\'envoi d\'email:', {
+      to,
+      templateId,
+      dynamicTemplateData
+    });
 
     const msg = {
       to,
@@ -89,37 +99,30 @@ app.post('/api/send-email', async (req, res) => {
         name: 'Circuit de Bellefontaine'
       },
       templateId,
-      dynamicTemplateData
+      dynamic_template_data: dynamicTemplateData
     };
 
-    console.log('Configuration email:', {
-      ...msg,
-      from: SENDGRID_FROM_EMAIL,
-      apiKeyLength: SENDGRID_API_KEY.length
+    const [response] = await sgMail.send(msg);
+    
+    console.log('Email envoyé avec succès:', {
+      statusCode: response?.statusCode,
+      headers: response?.headers
     });
 
-    const [response] = await sgMail.send(msg);
-    console.log('Email envoyé avec succès:', {
-      statusCode: response.statusCode,
-      headers: response.headers
-    });
-    
-    res.json({ 
-      success: true,
+    res.status(200).json({ 
+      message: 'Email envoyé avec succès',
       messageId: response?.headers['x-message-id']
     });
   } catch (error) {
-    console.error('Erreur détaillée SendGrid:', {
+    console.error('Erreur lors de l\'envoi de l\'email:', {
       message: error.message,
       code: error.code,
       response: error.response?.body
     });
-    
+
     res.status(500).json({ 
       error: 'Erreur lors de l\'envoi de l\'email',
-      details: error.message,
-      code: error.code,
-      response: error.response?.body
+      details: error.message
     });
   }
 });

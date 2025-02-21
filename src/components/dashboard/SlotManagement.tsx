@@ -59,6 +59,7 @@ export const SlotManagement = () => {
     circuit_1_capacity: 20,
     circuit_2_capacity: 20,
   });
+  const [cancellationReason, setCancellationReason] = useState("");
 
   const { data: slots, isLoading } = useQuery({
     queryKey: ["slots"],
@@ -189,13 +190,74 @@ export const SlotManagement = () => {
   });
 
   const deleteSlotMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("slots")
-        .delete()
-        .eq("id", id);
+    mutationFn: async (params: { id: string; reason: string }) => {
+      try {
+        // 1. Récupérer d'abord les réservations pour ce créneau
+        const { data: bookings, error: bookingsError } = await supabase
+          .from("bookings")
+          .select("user_id")
+          .eq("slot_id", params.id);
 
-      if (error) throw error;
+        if (bookingsError) throw bookingsError;
+
+        if (!bookings || bookings.length === 0) {
+          // Pas de réservations, on peut supprimer directement
+          const { error } = await supabase
+            .from("slots")
+            .delete()
+            .eq("id", params.id);
+
+          if (error) throw error;
+          return;
+        }
+
+        // 2. Récupérer les emails des utilisateurs
+        const userIds = bookings.map(b => b.user_id);
+        const { data: users, error: usersError } = await supabase
+          .from("profiles")  // Utilisation de la table profiles au lieu de users
+          .select("email")
+          .in("id", userIds);
+
+        if (usersError) throw usersError;
+
+        // 3. Envoyer les emails de notification
+        if (users && users.length > 0) {
+          const emailPromises = users.map(user => 
+            fetch(`http://localhost:3001/api/send-email`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                to: user.email,
+                templateId: "d-1dd66d2ec71f4782b9bdcbfcf1e302e1",
+                dynamicTemplateData: {
+                  date: selectedSlot?.date ? format(new Date(selectedSlot.date), "dd MMMM yyyy", { locale: fr }) : "",
+                  reason: params.reason
+                }
+              })
+            }).then(response => {
+              if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status}`);
+              }
+              return response.json();
+            })
+          );
+
+          await Promise.all(emailPromises);
+        }
+
+        // 4. Supprimer le créneau
+        const { error } = await supabase
+          .from("slots")
+          .delete()
+          .eq("id", params.id);
+
+        if (error) throw error;
+      } catch (error) {
+        console.error("Erreur lors de la suppression:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["slots"] });
@@ -438,16 +500,41 @@ export const SlotManagement = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Supprimer le créneau</AlertDialogTitle>
+          </AlertDialogHeader>
+          <div className="space-y-4 py-4">
             <AlertDialogDescription>
               Êtes-vous sûr de vouloir supprimer ce créneau ? Cette action est irréversible.
             </AlertDialogDescription>
-          </AlertDialogHeader>
+            <div className="space-y-2">
+              <Label htmlFor="cancellation-reason">Motif de l'annulation</Label>
+              <Input
+                id="cancellation-reason"
+                value={cancellationReason}
+                onChange={(e) => setCancellationReason(e.target.value)}
+                placeholder="Veuillez indiquer le motif de l'annulation"
+              />
+            </div>
+          </div>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>
+            <AlertDialogCancel 
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setCancellationReason("");
+              }}
+            >
               Annuler
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => selectedSlot && deleteSlotMutation.mutate(selectedSlot.id)}
+              onClick={() => {
+                if (selectedSlot) {
+                  deleteSlotMutation.mutate({ 
+                    id: selectedSlot.id, 
+                    reason: cancellationReason 
+                  });
+                  setIsDeleteDialogOpen(false);
+                  setCancellationReason("");
+                }
+              }}
             >
               Supprimer
             </AlertDialogAction>
