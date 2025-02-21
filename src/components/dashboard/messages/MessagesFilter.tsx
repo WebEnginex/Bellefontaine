@@ -1,13 +1,13 @@
 import React from "react";
 import { MessageStatus } from "@/types/messages";
-import { Input } from "@/components/ui/Input";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/Select";
+} from "@/components/ui/select";
 
 interface MessagesFilterProps {
   filters: {

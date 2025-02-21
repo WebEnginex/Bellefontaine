@@ -1,0 +1,5 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+const Footer = () => {
+    return (_jsx("footer", { className: "bg-secondary text-white py-8", children: _jsxs("div", { className: "container mx-auto px-4", children: [_jsxs("div", { className: "flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-8", children: [_jsxs("div", { children: [_jsx("h4", { className: "text-lg font-bold mb-2", children: "Contact" }), _jsx("p", { className: "text-gray-300", children: "Email: motocrossavesnois@gmail.com" })] }), _jsxs("div", { children: [_jsx("h4", { className: "text-lg font-bold mb-2", children: "Horaires" }), _jsx("p", { className: "text-gray-300", children: "Mercredi et samedi 13h - 18h." }), _jsx("p", { className: "text-gray-300", children: "Jeudi et dimanche, selon conditions." })] })] }), _jsx("div", { className: "mt-8 border-t border-gray-700 pt-4 text-center text-gray-300", children: _jsx("p", { children: "\u00A9 2024 Circuit de Bellefontaine. Tous droits r\u00E9serv\u00E9s." }) })] }) }));
+};
+export default Footer;
