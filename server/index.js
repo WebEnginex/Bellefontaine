@@ -53,6 +53,23 @@ app.get('/', (req, res) => {
   res.json({ message: 'Serveur Circuit de Bellefontaine opérationnel' });
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Serveur démarré sur le port ${PORT}`);
+});
+
+// Gestion gracieuse de l'arrêt
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  server.close(() => {
+    console.log('HTTP server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT signal received: closing HTTP server');
+  server.close(() => {
+    console.log('HTTP server closed');
+    process.exit(0);
+  });
 });
