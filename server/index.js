@@ -36,12 +36,31 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 // Route pour envoyer des emails
 app.post('/api/send-email', async (req, res) => {
   try {
+    console.log('Requête reçue:', req.body);
+    
     const { to, templateId, dynamicTemplateData } = req.body;
-    console.log('Envoi d\'email à:', to);
+    
+    if (!to || !templateId || !dynamicTemplateData) {
+      console.error('Données manquantes:', { to, templateId, dynamicTemplateData });
+      return res.status(400).json({ 
+        error: 'Données manquantes',
+        details: 'to, templateId et dynamicTemplateData sont requis'
+      });
+    }
+
+    console.log('Préparation de l\'envoi:', {
+      to,
+      from: process.env.SENDGRID_FROM_EMAIL || 'contact@circuitdebellefontaine.fr',
+      templateId,
+      dynamicTemplateData
+    });
     
     await sgMail.send({
       to,
-      from: process.env.SENDGRID_FROM_EMAIL || 'contact@circuitdebellefontaine.fr',
+      from: {
+        email: process.env.SENDGRID_FROM_EMAIL || 'contact@circuitdebellefontaine.fr',
+        name: 'Circuit de Bellefontaine'
+      },
       templateId,
       dynamicTemplateData
     });
@@ -49,10 +68,17 @@ app.post('/api/send-email', async (req, res) => {
     console.log('Email envoyé avec succès à:', to);
     res.json({ success: true });
   } catch (error) {
-    console.error('Erreur envoi email:', error);
+    console.error('Erreur détaillée SendGrid:', {
+      message: error.message,
+      code: error.code,
+      response: error.response?.body
+    });
+    
     res.status(500).json({ 
       error: 'Erreur lors de l\'envoi de l\'email',
-      details: error.message 
+      details: error.message,
+      code: error.code,
+      response: error.response?.body
     });
   }
 });
