@@ -36,14 +36,17 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 // Route pour envoyer des emails
 app.post('/api/send-email', async (req, res) => {
   try {
-    const { to, subject, text, html } = req.body;
+    const { to, templateId, dynamicTemplateData } = req.body;
+    console.log('Envoi d\'email à:', to);
+    
     await sgMail.send({
       to,
       from: process.env.SENDGRID_FROM_EMAIL || 'contact@circuitdebellefontaine.fr',
-      subject,
-      text,
-      html: html || text
+      templateId,
+      dynamicTemplateData
     });
+
+    console.log('Email envoyé avec succès à:', to);
     res.json({ success: true });
   } catch (error) {
     console.error('Erreur envoi email:', error);
