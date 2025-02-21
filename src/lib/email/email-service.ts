@@ -1,22 +1,19 @@
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.ZOHO_SMTP_HOST || 'smtp.zoho.eu',
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.ZOHO_EMAIL,
-    pass: process.env.ZOHO_PASSWORD,
-  },
-});
+if (!process.env.SENDGRID_API_KEY) {
+  throw new Error('SENDGRID_API_KEY is not defined');
+}
 
-export const sendEmail = async (to: string, subject: string, text: string) => {
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+export const sendEmail = async (to: string, subject: string, text: string, html?: string) => {
   try {
-    await transporter.sendMail({
-      from: process.env.ZOHO_EMAIL,
+    await sgMail.send({
       to,
+      from: 'contact@circuitdebellefontaine.fr', // Utilisez votre domaine vérifié SendGrid
       subject,
       text,
+      html: html || text,
     });
     return { success: true };
   } catch (error) {
