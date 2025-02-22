@@ -35,6 +35,8 @@ import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
 import { format, isBefore, startOfDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
+const API_BASE_URL = process.env.NODE_ENV === 'production' ? 'https://circuitdebellefontaine.fr' : 'http://localhost:3001';
+
 interface Slot {
   id: string;
   date: string;
@@ -223,7 +225,7 @@ export const SlotManagement = () => {
         // 3. Envoyer les emails de notification
         if (users && users.length > 0) {
           const emailPromises = users.map(user => 
-            fetch(`http://localhost:3001/api/send-email`, {
+            fetch(`${API_BASE_URL}/api/send-email`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
