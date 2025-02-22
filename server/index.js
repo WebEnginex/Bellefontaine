@@ -44,14 +44,15 @@ sgMail.setApiKey(SENDGRID_API_KEY);
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+const corsOptions = {
+  origin: ['http://localhost:5173', 'https://circuitdebellefontaine.fr'],
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+
 // Middleware pour servir les fichiers statiques du build Vite
 app.use(express.static(join(__dirname, '../dist')));
-
-// Configuration CORS
-app.use(cors({
-  origin: 'http://localhost:5173', // URL du frontend en développement
-  credentials: true
-}));
 
 app.use(express.json());
 
@@ -133,7 +134,7 @@ app.get('*', (req, res) => {
 });
 
 // Démarrage du serveur
-const server = app.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Serveur démarré sur le port ${PORT}`);
   console.log('Configuration:');
   console.log('- PORT:', PORT);
@@ -146,7 +147,7 @@ const server = app.listen(PORT, () => {
 // Gestion gracieuse de l'arrêt
 process.on('SIGTERM', () => {
   console.log('Signal SIGTERM reçu: fermeture du serveur HTTP');
-  server.close(() => {
+  app.close(() => {
     console.log('Serveur HTTP fermé');
     process.exit(0);
   });
@@ -154,7 +155,7 @@ process.on('SIGTERM', () => {
 
 process.on('SIGINT', () => {
   console.log('Signal SIGINT reçu: fermeture du serveur HTTP');
-  server.close(() => {
+  app.close(() => {
     console.log('Serveur HTTP fermé');
     process.exit(0);
   });
