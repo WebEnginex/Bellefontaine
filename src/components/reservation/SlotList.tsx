@@ -53,7 +53,7 @@ export const SlotList = ({ slots, selectedDate, onSelectDate, isLoading }: SlotL
               </p>
               <div className="flex items-center text-gray-600 text-sm mt-1">
                 <Clock className="h-4 w-4 mr-1 flex-shrink-0" />
-                <span>14h00 - 18h00</span>
+                <span>13h30 - 18h00</span>
               </div>
             </div>
             <div className="space-y-1 md:text-right">

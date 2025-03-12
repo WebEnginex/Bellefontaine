@@ -200,7 +200,7 @@ export default function Account() {
                             </p>
                             <div className="flex items-center text-sm text-muted-foreground">
                               <Clock className="h-4 w-4 mr-1" />
-                              <span>14h00 - 18h00</span>
+                              <span>30h30 - 18h00</span>
                             </div>
                             <p className="text-sm text-muted-foreground">
                               Nombre de pilotes : {booking.number_of_pilots}
