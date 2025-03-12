@@ -200,7 +200,7 @@ export default function Account() {
                             </p>
                             <div className="flex items-center text-sm text-muted-foreground">
                               <Clock className="h-4 w-4 mr-1" />
-                              <span>30h30 - 18h00</span>
+                              <span>13h30 - 18h00</span>
                             </div>
                             <p className="text-sm text-muted-foreground">
                               Nombre de pilotes : {booking.number_of_pilots}
@@ -264,8 +264,8 @@ export default function Account() {
 function getBookingWarningMessage(bookingDate: string) {
   const today = new Date();
   const reservationDate = new Date(bookingDate);
-  // Set the reservation time to 14:00
-  const reservationDateTime = setMinutes(setHours(reservationDate, 14), 0);
+  // Set the reservation time to 13:30
+  const reservationDateTime = setMinutes(setHours(reservationDate, 13), 30);
   const daysUntilReservation = differenceInDays(reservationDateTime, today);
   const hoursUntilReservation = differenceInHours(reservationDateTime, today);
 
