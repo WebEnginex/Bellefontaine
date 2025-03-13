@@ -183,7 +183,7 @@ export default function SignUpForm({ onSuccess }: SignUpFormProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Vérifiez votre boîte mail</AlertDialogTitle>
             <AlertDialogDescription>
-              Un email de confirmation vous a été envoyé. Veuillez cliquer sur le lien dans l'email pour activer votre compte.
+              Un email de confirmation vous a été envoyé. Veuillez cliquer sur le lien dans l'email pour activer votre compte. (Si vous ne voyez pas le mail de confirmation, vérifiez vos spams.)
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
