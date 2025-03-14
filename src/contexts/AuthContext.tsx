@@ -109,7 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         toast({
           title: "Inscription réussie",
-          description: "Votre compte a été créé avec succès. Vous allez recevoir un email de confirmation.",
+          description: "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.",
         });
         navigate("/auth");
       }

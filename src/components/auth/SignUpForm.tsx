@@ -5,15 +5,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 interface SignUpFormProps {
   onSuccess: () => void;
@@ -26,7 +17,6 @@ export default function SignUpForm({ onSuccess }: SignUpFormProps) {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const validateEmail = (email: string) => {
     return email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
@@ -86,7 +76,7 @@ export default function SignUpForm({ onSuccess }: SignUpFormProps) {
       setPassword("");
       setFirstName("");
       setLastName("");
-      setShowConfirmDialog(true);
+      onSuccess();
     } catch (error: any) {
       if (error.message.includes('rate limit')) {
         toast({
@@ -104,11 +94,6 @@ export default function SignUpForm({ onSuccess }: SignUpFormProps) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleConfirmation = () => {
-    setShowConfirmDialog(false);
-    onSuccess();
   };
 
   return (
@@ -177,20 +162,6 @@ export default function SignUpForm({ onSuccess }: SignUpFormProps) {
           </CardFooter>
         </form>
       </Card>
-
-      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Vérifiez votre boîte mail</AlertDialogTitle>
-            <AlertDialogDescription>
-              Un email de confirmation vous a été envoyé. Veuillez cliquer sur le lien dans l'email pour activer votre compte. (Si vous ne voyez pas le mail de confirmation, vérifiez vos spams.)
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={handleConfirmation}>Compris</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }

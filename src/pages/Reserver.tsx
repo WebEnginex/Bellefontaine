@@ -22,10 +22,13 @@ const ToastContent = () => {
       </div>
       <div className="space-y-2 text-sm text-muted-foreground">
         <p>• Règlement : Le paiement se fera sur place</p>
-        <p>• Gestion : Vous pouvez consulter et annuler vos réservations depuis votre compte</p>
+        <p>
+          • Gestion : Vous pouvez consulter et annuler vos réservations depuis
+          votre compte
+        </p>
       </div>
-      <Button 
-        variant="outline" 
+      <Button
+        variant="outline"
         className="w-full"
         onClick={() => navigate("/account")}
       >
@@ -49,13 +52,13 @@ const Reserver = () => {
     slotsWithBookings,
     isLoading,
     handleSubmit,
-    user
+    user,
   } = useReservation();
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const success = await handleSubmit(e);
-    
+
     if (success) {
       toast({
         title: "✅ Réservation confirmée",
@@ -68,7 +71,8 @@ const Reserver = () => {
   if (!user) {
     toast({
       title: "Connexion requise",
-      description: "Vous devez être connecté pour accéder à la page de réservation.",
+      description:
+        "Vous devez être connecté pour accéder à la page de réservation.",
       action: (
         <ToastAction altText="Se connecter" onClick={() => navigate("/auth")}>
           Se connecter
@@ -88,8 +92,15 @@ const Reserver = () => {
         <div className="max-w-4xl mx-auto">
           <form onSubmit={onSubmit} className="space-y-12">
             <div className="space-y-6">
-              <h2 className="text-2xl font-semibold mb-6">Sélectionnez votre date</h2>
-              <SlotList 
+              <h2 className="text-xl md:text-2xl font-semibold mb-6">
+                Sélectionnez la{" "}
+                <span className="text-red-500 font-bold inline">date</span>, le{" "}
+                <span className="text-red-500 font-bold inline">circuit </span>
+                et le nombre de{" "}
+                <span className="text-red-500 font-bold inline">pilotes</span>
+              </h2>
+
+              <SlotList
                 slots={slotsWithBookings || []}
                 selectedDate={selectedDate}
                 onSelectDate={setSelectedDate}
@@ -105,7 +116,9 @@ const Reserver = () => {
                 className="space-y-12"
               >
                 <div>
-                  <h2 className="text-2xl font-semibold mb-6">Choisissez votre circuit</h2>
+                  <h2 className="text-2xl font-semibold mb-6">
+                    Choisissez votre circuit
+                  </h2>
                   <div className="grid md:grid-cols-2 gap-8">
                     <CircuitCard
                       title="Circuit Motocross"
@@ -113,23 +126,33 @@ const Reserver = () => {
                       image={motocrossImage}
                       isSelected={circuit === "motocross"}
                       onClick={() => {
-                        const selectedSlot = slotsWithBookings?.find(slot => slot.date === selectedDate);
-                        if (selectedSlot && selectedSlot.circuit_1_available > 0) {
+                        const selectedSlot = slotsWithBookings?.find(
+                          (slot) => slot.date === selectedDate
+                        );
+                        if (
+                          selectedSlot &&
+                          selectedSlot.circuit_1_available > 0
+                        ) {
                           setCircuit("motocross");
                         } else {
                           toast({
                             title: "Circuit complet",
-                            description: "Il n'y a plus de places disponibles sur ce circuit.",
+                            description:
+                              "Il n'y a plus de places disponibles sur ce circuit.",
                             duration: 5000,
                           });
                         }
                       }}
-                      availablePlaces={slotsWithBookings?.find(slot => slot.date === selectedDate)?.circuit_1_available || 0}
+                      availablePlaces={
+                        slotsWithBookings?.find(
+                          (slot) => slot.date === selectedDate
+                        )?.circuit_1_available || 0
+                      }
                       features={[
                         "Longueur : 1920 mètres",
                         "Obstacles naturels et artificiels",
                         "Grandes montées et descentes",
-                        "Pour pilotes expérimentés"
+                        "Pour pilotes expérimentés",
                       ]}
                     />
 
@@ -139,23 +162,33 @@ const Reserver = () => {
                       image={supercrossImage}
                       isSelected={circuit === "supercross"}
                       onClick={() => {
-                        const selectedSlot = slotsWithBookings?.find(slot => slot.date === selectedDate);
-                        if (selectedSlot && selectedSlot.circuit_2_available > 0) {
+                        const selectedSlot = slotsWithBookings?.find(
+                          (slot) => slot.date === selectedDate
+                        );
+                        if (
+                          selectedSlot &&
+                          selectedSlot.circuit_2_available > 0
+                        ) {
                           setCircuit("supercross");
                         } else {
                           toast({
                             title: "Circuit complet",
-                            description: "Il n'y a plus de places disponibles sur ce circuit.",
+                            description:
+                              "Il n'y a plus de places disponibles sur ce circuit.",
                             duration: 5000,
                           });
                         }
                       }}
-                      availablePlaces={slotsWithBookings?.find(slot => slot.date === selectedDate)?.circuit_2_available || 0}
+                      availablePlaces={
+                        slotsWithBookings?.find(
+                          (slot) => slot.date === selectedDate
+                        )?.circuit_2_available || 0
+                      }
                       features={[
                         "Longueur : 590 mètres",
                         "Sauts et whoops techniques",
                         "Sections rythmiques",
-                        "Pour pilotes expérimentés"
+                        "Pour pilotes expérimentés",
                       ]}
                     />
                   </div>
@@ -170,12 +203,21 @@ const Reserver = () => {
                   >
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                       <div className="space-y-2">
-                        <h2 className="text-2xl font-semibold">Nombre de pilotes</h2>
+                        <h2 className="text-2xl font-semibold">
+                          Nombre de pilotes
+                        </h2>
                         <p className="text-sm text-muted-foreground">
-                          {circuit === "motocross" ? 
-                            `${slotsWithBookings?.find(slot => slot.date === selectedDate)?.circuit_1_available || 0} places disponibles` :
-                            `${slotsWithBookings?.find(slot => slot.date === selectedDate)?.circuit_2_available || 0} places disponibles`
-                          }
+                          {circuit === "motocross"
+                            ? `${
+                                slotsWithBookings?.find(
+                                  (slot) => slot.date === selectedDate
+                                )?.circuit_1_available || 0
+                              } places disponibles`
+                            : `${
+                                slotsWithBookings?.find(
+                                  (slot) => slot.date === selectedDate
+                                )?.circuit_2_available || 0
+                              } places disponibles`}
                         </p>
                       </div>
                       <div className="flex items-center gap-4 w-full md:w-auto">
@@ -184,8 +226,12 @@ const Reserver = () => {
                           onChange={setNumberOfPilots}
                           maxPilots={
                             circuit === "motocross"
-                              ? slotsWithBookings?.find(slot => slot.date === selectedDate)?.circuit_1_available || 0
-                              : slotsWithBookings?.find(slot => slot.date === selectedDate)?.circuit_2_available || 0
+                              ? slotsWithBookings?.find(
+                                  (slot) => slot.date === selectedDate
+                                )?.circuit_1_available || 0
+                              : slotsWithBookings?.find(
+                                  (slot) => slot.date === selectedDate
+                                )?.circuit_2_available || 0
                           }
                         />
                         <Button
@@ -194,7 +240,11 @@ const Reserver = () => {
                           className="w-full md:w-auto"
                           disabled={isSubmitting || hasExistingBooking}
                         >
-                          {isSubmitting ? "Réservation en cours..." : hasExistingBooking ? "Réservation existante" : "Réserver"}
+                          {isSubmitting
+                            ? "Réservation en cours..."
+                            : hasExistingBooking
+                            ? "Réservation existante"
+                            : "Réserver"}
                         </Button>
                       </div>
                     </div>

@@ -24,7 +24,7 @@ export const SlotList = ({ slots, selectedDate, onSelectDate, isLoading }: SlotL
   if (!slots || slots.length === 0) {
     return (
       <div className="text-center py-8 text-gray-600">
-        Aucun créneau disponible
+        Aucun créneau disponible pour le moment, ou toutes les places ont été prises. N’hésitez pas à vérifier plus tard au cas où une place se libérerait suite à un désistement !
       </div>
     );
   }
