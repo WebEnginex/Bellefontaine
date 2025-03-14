@@ -111,7 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           title: "Inscription réussie",
           description: "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.",
         });
-        navigate("/auth");
+        navigate("/reserver");
       }
     } catch (error: any) {
       console.error("Erreur complète d'inscription:", error);
